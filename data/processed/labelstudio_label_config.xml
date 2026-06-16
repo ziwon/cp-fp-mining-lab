@@ -1,0 +1,28 @@
+<View>
+  <Image name="image" value="$image"/>
+  <Header value="Model prediction: $pred_class / confidence: $pred_confidence"/>
+  <Choices name="is_event" toName="image" choice="single" required="true">
+    <Choice value="real_event"/>
+    <Choice value="false_positive"/>
+    <Choice value="uncertain"/>
+  </Choices>
+  <Choices name="fp_type" toName="image" choice="single">
+    <Choice value="steam"/>
+    <Choice value="fog"/>
+    <Choice value="dust"/>
+    <Choice value="reflection"/>
+    <Choice value="headlight"/>
+    <Choice value="shadow"/>
+    <Choice value="sitting"/>
+    <Choice value="animal"/>
+    <Choice value="authorized_worker"/>
+    <Choice value="unknown"/>
+  </Choices>
+  <Choices name="bbox_valid" toName="image" choice="single">
+    <Choice value="valid"/>
+    <Choice value="wrong_class"/>
+    <Choice value="wrong_location"/>
+    <Choice value="unnecessary"/>
+  </Choices>
+  <TextArea name="comment" toName="image" placeholder="Root cause or reviewer comment"/>
+</View>

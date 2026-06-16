@@ -1,0 +1,24 @@
+name: smoke-test
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  demo:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync --frozen
+      - run: uv run ruff check src scripts tests
+      - run: uv run pytest
+      - run: uv run python scripts/00_generate_sample_data.py
+      - run: uv run python scripts/01_extract_embeddings.py --method simple
+      - run: uv run python scripts/02_cluster_false_positives.py
+      - run: uv run python scripts/03_export_for_label_studio.py
+      - run: uv run python scripts/04_import_label_studio_export.py --input data/labelstudio_exports/sample_review_export.json
+      - run: WANDB_MODE=offline uv run python scripts/05_log_to_wandb.py

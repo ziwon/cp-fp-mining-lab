@@ -1,0 +1,32 @@
+paths:
+  raw_dir: data/raw
+  processed_dir: data/processed
+  labelstudio_export_dir: data/labelstudio_exports
+
+sample_data:
+  seed: 42
+  image_size: 224
+  samples_per_type: 24
+  fp_types:
+    - steam
+    - fog
+    - reflection
+    - headlight
+    - shadow
+    - animal
+
+embedding:
+  method: simple
+  output_file: data/processed/embeddings.npy
+  metadata_file: data/processed/fp_events.csv
+
+clustering:
+  umap_neighbors: 10
+  umap_min_dist: 0.05
+  hdbscan_min_cluster_size: 5
+  hdbscan_min_samples: 3
+
+wandb:
+  project: cv-fp-mining-lab
+  entity: null
+  artifact_name: curated-fp-samples

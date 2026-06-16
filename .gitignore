@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+*.pyc
+*.egg-info/
+.wandb/
+wandb/
+data/raw/*.png
+data/processed/*.npy
+data/processed/*.csv
+data/processed/*.json
+!data/labelstudio_exports/sample_review_export.json

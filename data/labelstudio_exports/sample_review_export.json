@@ -1,0 +1,46 @@
+[
+  {
+    "id": 1,
+    "data": {
+      "image": "data/raw/evt_steam_0000.png",
+      "event_id": "evt_steam_0000",
+      "camera_id": "cam-001",
+      "site_id": "site-01",
+      "pred_class": "smoke",
+      "pred_confidence": 0.87,
+      "cluster_id": 0
+    },
+    "annotations": [
+      {
+        "result": [
+          {"from_name": "is_event", "to_name": "image", "type": "choices", "value": {"choices": ["false_positive"]}},
+          {"from_name": "fp_type", "to_name": "image", "type": "choices", "value": {"choices": ["steam"]}},
+          {"from_name": "bbox_valid", "to_name": "image", "type": "choices", "value": {"choices": ["unnecessary"]}},
+          {"from_name": "comment", "to_name": "image", "type": "textarea", "value": {"text": ["Looks like drain steam, not smoke."]}}
+        ]
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "data": {
+      "image": "data/raw/evt_headlight_0000.png",
+      "event_id": "evt_headlight_0000",
+      "camera_id": "cam-004",
+      "site_id": "site-02",
+      "pred_class": "fire",
+      "pred_confidence": 0.91,
+      "cluster_id": 3
+    },
+    "annotations": [
+      {
+        "result": [
+          {"from_name": "is_event", "to_name": "image", "type": "choices", "value": {"choices": ["false_positive"]}},
+          {"from_name": "fp_type", "to_name": "image", "type": "choices", "value": {"choices": ["headlight"]}},
+          {"from_name": "bbox_valid", "to_name": "image", "type": "choices", "value": {"choices": ["wrong_class"]}},
+          {"from_name": "comment", "to_name": "image", "type": "textarea", "value": {"text": ["Vehicle headlight reflection triggered fire."]}}
+        ]
+      }
+    ]
+  }
+]
