@@ -206,8 +206,27 @@ just docker-shell
 The Compose stack includes:
 
 - `miner`: the reusable Python worker image for embedding, clustering, export, import, and W&B logging
+- `ml-backend`: Label Studio ML backend serving the detector (Phase 2)
+- `webhook`: retrain-trigger receiver (Phase 3)
 - `minio`: local S3-compatible object storage for frame/crop artifacts
-- `labelstudio`: human review UI at `http://localhost:8080`
+- `labelstudio`: human review UI
+- `wandb`: self-hosted Weights & Biases Server for runs, Tables, and Artifacts
+
+Bring up the local UIs and services with `just docker-up` (minio + labelstudio + wandb)
+or `just docker-up-all` (also ml-backend + webhook).
+
+**Host ports.** Defaults follow each service's native port, but on a host where
+those are taken you can remap them via a `.env` file (see `.env.example`):
+`LABEL_STUDIO_PORT`, `MINIO_API_PORT`, `MINIO_CONSOLE_PORT`, `WANDB_PORT`,
+`ML_BACKEND_PORT`, `WEBHOOK_PORT`.
+
+**Self-hosted W&B.** The `wandb` service runs the single-container `wandb/local`
+image with a persistent `wandb-server-data` volume. First run: open the W&B UI,
+create a user, copy the API key into `.env` as `WANDB_API_KEY`, then set
+`WANDB_MODE=online` so `scripts/05_log_to_wandb.py` logs to your instance (clients
+reach it at `http://wandb:8080` inside the network). Full W&B Server features
+require a license (`WANDB_LICENSE`) from https://deploy.wandb.ai; otherwise W&B
+stays in offline mode writing to `./wandb/`.
 
 On an NVIDIA GPU host, install the NVIDIA Container Toolkit and Docker Compose v2. The `miner` service requests all available GPUs through the Compose device reservation block.
 

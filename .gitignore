@@ -8,4 +8,6 @@ data/raw/*.png
 data/processed/*.npy
 data/processed/*.csv
 data/processed/*.json
+data/processed/model_registry/
 !data/labelstudio_exports/sample_review_export.json
+.env

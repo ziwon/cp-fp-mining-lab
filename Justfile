@@ -48,7 +48,10 @@ docker-shell:
     docker compose run --rm miner bash
 
 docker-up:
-    docker compose up -d minio labelstudio
+    docker compose up -d minio labelstudio wandb
+
+docker-up-all:
+    docker compose up -d minio labelstudio wandb ml-backend webhook
 
 docker-down:
     docker compose down

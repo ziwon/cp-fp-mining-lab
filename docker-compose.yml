@@ -9,6 +9,9 @@ services:
       PYTHONPATH: /app/src
       WANDB_MODE: ${WANDB_MODE:-offline}
       WANDB_PROJECT: ${WANDB_PROJECT:-cv-fp-mining-lab}
+      # Point the W&B client at the self-hosted server (in-cluster DNS name).
+      WANDB_BASE_URL: ${WANDB_BASE_URL:-http://wandb:8080}
+      WANDB_API_KEY: ${WANDB_API_KEY:-}
       NVIDIA_VISIBLE_DEVICES: ${NVIDIA_VISIBLE_DEVICES:-all}
       NVIDIA_DRIVER_CAPABILITIES: compute,utility
       S3_ENDPOINT_URL: http://minio:9000
@@ -85,6 +88,23 @@ services:
     volumes:
       - minio-data:/data
 
+  # Self-hosted Weights & Biases Server (single-container "local" image).
+  # First run: open the UI, create a user, copy the API key into .env
+  # (WANDB_API_KEY) and set WANDB_MODE=online to log to this instance.
+  # Full features (teams, long retention) require a license from
+  # https://deploy.wandb.ai — set WANDB_LICENSE.
+  wandb:
+    image: wandb/local:latest
+    ports:
+      - "${WANDB_PORT:-18082}:8080"
+    environment:
+      # Externally reachable URL so generated run/report links resolve.
+      HOST: ${WANDB_HOST:-http://localhost:18082}
+      LICENSE: ${WANDB_LICENSE:-}
+    volumes:
+      - wandb-server-data:/vol
+
 volumes:
   labelstudio-data:
   minio-data:
+  wandb-server-data:
