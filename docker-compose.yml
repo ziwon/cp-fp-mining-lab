@@ -49,6 +49,12 @@ services:
       - ./data:/app/data
     depends_on:
       - miner
+    networks:
+      default:
+        # Dotted alias so Label Studio's URL validator accepts the address
+        # (bare service names like "ml-backend" are rejected as invalid URLs).
+        aliases:
+          - ml-backend.local
 
   webhook:
     image: cv-fp-mining-lab:latest
@@ -70,6 +76,11 @@ services:
       - ./data:/app/data
     depends_on:
       - miner
+    networks:
+      default:
+        # Dotted alias so Label Studio's URL validator accepts the address.
+        aliases:
+          - webhook.local
 
   labelstudio:
     image: heartexlabs/label-studio:latest
