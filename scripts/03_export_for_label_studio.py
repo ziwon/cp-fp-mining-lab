@@ -52,9 +52,13 @@ def main() -> None:
     ].to_csv(ranking_path, index=False)
 
     lscfg = cfg.get("labelstudio", {})
-    image_url_prefix = (
-        lscfg.get("local_files_url_prefix") if lscfg.get("image_mode") == "local_files" else None
-    )
+    image_mode = lscfg.get("image_mode", "path")
+    if image_mode == "http":
+        image_url_prefix = lscfg.get("http_base_url", "").rstrip("/") + "/"
+    elif image_mode == "local_files":
+        image_url_prefix = lscfg.get("local_files_url_prefix")
+    else:
+        image_url_prefix = None
     output_path = processed_dir / "labelstudio_tasks.json"
     tasks = dataframe_to_labelstudio_tasks(
         ranked,

@@ -35,12 +35,14 @@ active_learning:
 
 labelstudio:
   # How task image references are emitted for the Label Studio UI.
-  #   local_files: serve from the LS container via local-files URLs (Docker demo)
-  #   path:        keep the raw local path (only renders if LS can read it directly)
-  image_mode: local_files
+  #   http:        absolute URL served by the fileserver container (reliable demo)
+  #   local_files: LS local-files URLs (needs a registered Local Storage in LS)
+  #   path:        raw local path (only renders if LS can read it directly)
+  image_mode: http
+  # Browser-reachable base for the fileserver (host-mapped FILESERVER_PORT).
+  http_base_url: http://localhost:18090
   local_files_url_prefix: "/data/local-files/?d="
-  # Stripped from the path; the remainder is relative to the LS document root
-  # (LABEL_STUDIO_LOCAL_FILES_DOCUMENT_ROOT=/cv-fp-mining-lab/data).
+  # Stripped from the path; the remainder is appended to the base above.
   data_dir_strip: "data/"
 
 detector:

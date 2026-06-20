@@ -108,6 +108,16 @@ services:
     volumes:
       - minio-data:/data
 
+  # Static image server — serves data/ over plain HTTP so the Label Studio UI can
+  # render task images without the local-files auth dance. Browser fetches images
+  # directly from here; the ML backend still reads files via image_local_path.
+  fileserver:
+    image: nginx:alpine
+    ports:
+      - "${FILESERVER_PORT:-18090}:80"
+    volumes:
+      - ./data:/usr/share/nginx/html:ro
+
   # Self-hosted Weights & Biases Server (single-container "local" image).
   # First run: open the UI, create a user, copy the API key into .env
   # (WANDB_API_KEY) and set WANDB_MODE=online to log to this instance.
