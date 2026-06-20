@@ -17,10 +17,11 @@ RUN apt-get update \
 
 COPY pyproject.toml uv.lock README.md ./
 RUN python -m pip install --upgrade pip uv \
-    && uv sync --frozen --no-dev --no-install-project
+    && uv sync --frozen --no-dev --no-install-project --extra serve
 
 COPY configs ./configs
 COPY scripts ./scripts
+COPY services ./services
 COPY src ./src
 COPY data/labelstudio_exports ./data/labelstudio_exports
 

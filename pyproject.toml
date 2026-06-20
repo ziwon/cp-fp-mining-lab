@@ -23,6 +23,9 @@ clip = [
     "torchvision>=0.16",
     "transformers>=4.40",
 ]
+serve = [
+    "flask>=3.0",
+]
 
 [dependency-groups]
 dev = [

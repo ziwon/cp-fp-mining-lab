@@ -31,6 +31,38 @@ services:
               count: all
               capabilities: [gpu]
 
+  ml-backend:
+    image: cv-fp-mining-lab:latest
+    working_dir: /app
+    command: python services/ml_backend.py
+    environment:
+      PYTHONPATH: /app/src
+    ports:
+      - "${ML_BACKEND_PORT:-9090}:9090"
+    volumes:
+      - ./configs:/app/configs:ro
+      - ./services:/app/services:ro
+      - ./src:/app/src:ro
+      - ./data:/app/data
+    depends_on:
+      - miner
+
+  webhook:
+    image: cv-fp-mining-lab:latest
+    working_dir: /app
+    command: python services/webhook.py
+    environment:
+      PYTHONPATH: /app/src
+    ports:
+      - "${WEBHOOK_PORT:-9091}:9091"
+    volumes:
+      - ./configs:/app/configs:ro
+      - ./services:/app/services:ro
+      - ./src:/app/src:ro
+      - ./data:/app/data
+    depends_on:
+      - miner
+
   labelstudio:
     image: heartexlabs/label-studio:latest
     ports:

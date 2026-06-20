@@ -13,10 +13,20 @@ demo:
     uv run python scripts/03_export_for_label_studio.py
     uv run python scripts/04_import_label_studio_export.py --input data/labelstudio_exports/sample_review_export.json
     WANDB_MODE=offline uv run python scripts/05_log_to_wandb.py
+    uv run python scripts/06_train_detector.py
 
 check:
-    uv run ruff check src scripts tests
+    uv run ruff check src scripts services tests
     uv run pytest
+
+train:
+    uv run python scripts/06_train_detector.py
+
+serve-ml:
+    uv run python services/ml_backend.py
+
+serve-webhook:
+    uv run python services/webhook.py
 
 clean:
     rm -rf data/raw/*.png data/processed/* wandb .wandb
@@ -31,7 +41,8 @@ docker-demo:
         python scripts/02_cluster_false_positives.py && \
         python scripts/03_export_for_label_studio.py && \
         python scripts/04_import_label_studio_export.py --input data/labelstudio_exports/sample_review_export.json && \
-        WANDB_MODE=offline python scripts/05_log_to_wandb.py'
+        WANDB_MODE=offline python scripts/05_log_to_wandb.py && \
+        python scripts/06_train_detector.py'
 
 docker-shell:
     docker compose run --rm miner bash
