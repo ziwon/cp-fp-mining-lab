@@ -33,6 +33,16 @@ active_learning:
   strategy: entropy  # least_confidence | margin | entropy
   diversity: true    # round-robin across clusters so one cluster cannot dominate
 
+labelstudio:
+  # How task image references are emitted for the Label Studio UI.
+  #   local_files: serve from the LS container via local-files URLs (Docker demo)
+  #   path:        keep the raw local path (only renders if LS can read it directly)
+  image_mode: local_files
+  local_files_url_prefix: "/data/local-files/?d="
+  # Stripped from the path; the remainder is relative to the LS document root
+  # (LABEL_STUDIO_LOCAL_FILES_DOCUMENT_ROOT=/cv-fp-mining-lab/data).
+  data_dir_strip: "data/"
+
 detector:
   registry_dir: data/processed/model_registry
   metric_key: macro_f1

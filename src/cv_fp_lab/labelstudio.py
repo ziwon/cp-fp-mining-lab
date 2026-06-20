@@ -39,11 +39,35 @@ LABEL_CONFIG = """
 """.strip()
 
 
-def dataframe_to_labelstudio_tasks(df: pd.DataFrame, output_path: str | Path) -> list[dict[str, Any]]:
+def _to_local_files_url(image_path: str, url_prefix: str, strip: str) -> str:
+    """Rewrite a local image path to a Label Studio local-files serving URL.
+
+    Strips ``strip`` (the part covered by the LS document root) and prefixes with
+    ``url_prefix`` (e.g. ``/data/local-files/?d=``).
+    """
+    rel = image_path[len(strip):] if strip and image_path.startswith(strip) else image_path
+    return f"{url_prefix}{rel}"
+
+
+def dataframe_to_labelstudio_tasks(
+    df: pd.DataFrame,
+    output_path: str | Path,
+    image_url_prefix: str | None = None,
+    data_dir_strip: str = "",
+) -> list[dict[str, Any]]:
     tasks = []
     for row in df.to_dict(orient="records"):
+        local_path = row["image_path"]
+        image_ref = (
+            _to_local_files_url(local_path, image_url_prefix, data_dir_strip)
+            if image_url_prefix
+            else local_path
+        )
         data = {
-            "image": row["image_path"],
+            "image": image_ref,
+            # Kept so the ML backend can open the file regardless of how the UI
+            # references it (local-files URL vs. raw path).
+            "image_local_path": local_path,
             "event_id": row["event_id"],
             "camera_id": row["camera_id"],
             "site_id": row["site_id"],

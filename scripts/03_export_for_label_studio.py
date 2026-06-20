@@ -51,8 +51,17 @@ def main() -> None:
         ["event_id", "cluster_id", "pred_confidence", "uncertainty", "acquisition_rank"]
     ].to_csv(ranking_path, index=False)
 
+    lscfg = cfg.get("labelstudio", {})
+    image_url_prefix = (
+        lscfg.get("local_files_url_prefix") if lscfg.get("image_mode") == "local_files" else None
+    )
     output_path = processed_dir / "labelstudio_tasks.json"
-    tasks = dataframe_to_labelstudio_tasks(ranked, output_path)
+    tasks = dataframe_to_labelstudio_tasks(
+        ranked,
+        output_path,
+        image_url_prefix=image_url_prefix,
+        data_dir_strip=lscfg.get("data_dir_strip", ""),
+    )
     (processed_dir / "labelstudio_label_config.xml").write_text(LABEL_CONFIG, encoding="utf-8")
 
     scope = f"top {len(tasks)} of {len(df)}" if args.budget else f"all {len(tasks)}"

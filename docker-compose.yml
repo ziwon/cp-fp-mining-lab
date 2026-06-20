@@ -77,6 +77,10 @@ services:
       - "${LABEL_STUDIO_PORT:-8080}:8080"
     environment:
       LABEL_STUDIO_HOST: ${LABEL_STUDIO_HOST:-http://localhost:8080}
+      # Serve task images straight from the mounted data dir via
+      # /data/local-files/?d=<path relative to the document root>.
+      LABEL_STUDIO_LOCAL_FILES_SERVING_ENABLED: "true"
+      LABEL_STUDIO_LOCAL_FILES_DOCUMENT_ROOT: /cv-fp-mining-lab/data
     volumes:
       - labelstudio-data:/label-studio/data
       - ./data:/cv-fp-mining-lab/data:ro

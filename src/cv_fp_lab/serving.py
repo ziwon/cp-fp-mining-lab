@@ -29,7 +29,10 @@ def predict_tasks(
     if not tasks:
         return []
 
-    vectors = np.vstack([embed_fn(t["data"]["image"]) for t in tasks])
+    # Prefer the raw local path (openable by the backend) over the UI image ref,
+    # which may be a Label Studio local-files URL rather than a file path.
+    refs = [t["data"].get("image_local_path") or t["data"]["image"] for t in tasks]
+    vectors = np.vstack([embed_fn(r) for r in refs])
     labels = detector.predict(vectors)
     confidences = detector.confidence(vectors)
     uncertainties = detector.uncertainty(vectors)
