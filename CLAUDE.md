@@ -12,12 +12,15 @@ Dependencies are managed with `uv`. Tasks are wrapped in a `Justfile`.
 
 ```bash
 just setup        # uv sync — creates .venv/ from uv.lock
-just check        # uv run ruff check src scripts tests && uv run pytest
-just demo         # run the full 6-step pipeline (scripts 00→05) in offline mode
+just check        # uv run ruff check src scripts services tests && uv run pytest
+just demo         # run the full pipeline (scripts 00→06) in offline mode
+just train        # bootstrap/retrain the detector and gate-promote it
+just serve-ml     # Phase 2: Label Studio ML backend (needs `uv sync --extra serve`)
+just serve-webhook # Phase 3: retrain-trigger webhook (needs the serve extra)
 just clean        # remove generated data/raw/*.png, data/processed/*, wandb/
 
 uv run pytest tests/test_clustering.py::test_cluster_embeddings_handles_empty_embeddings  # single test
-uv run ruff check src scripts tests        # lint only (line-length 100)
+uv run ruff check src scripts services tests   # lint only (line-length 100)
 ```
 
 Docker (for a GPU mining server; `miner` service reserves all NVIDIA GPUs):
@@ -29,7 +32,7 @@ just docker-demo    # run the full pipeline inside the container
 just docker-shell   # interactive shell in the miner container
 ```
 
-CI (`.github/workflows/smoke-test.yml`) runs `uv sync --frozen`, ruff, pytest, then all six pipeline scripts on every push/PR. Keep the demo runnable offline — breaking it breaks CI.
+CI (`.github/workflows/smoke-test.yml`) runs `uv sync --frozen --extra serve`, ruff, pytest, then all pipeline scripts (00→06) on every push/PR. Keep the demo runnable offline — breaking it breaks CI. The Flask services aren't started in CI; their logic is covered by unit tests (`test_serving.py`, `test_feedback.py`).
 
 ## Architecture
 
@@ -44,7 +47,10 @@ Data flow (each step writes the input of the next):
 03_export_for_label_studio → labelstudio_tasks.json            (labelstudio.py)
 04_import_label_studio_export → reviewed_fp_samples.csv        (labelstudio.py)
 05_log_to_wandb          → W&B Table + dataset Artifact         (wandb_logging.py)
+06_train_detector        → versioned model in model_registry/    (training.py, detector.py, registry.py)
 ```
+
+Phases 2–3 add a live model loop **outside** the linear pipeline: `services/ml_backend.py` serves the production detector to Label Studio (predictions + uncertainty); `services/webhook.py` receives annotation webhooks, batches them, and retrains → eval → gate-promotes a new model that the backend then serves. Both are thin Flask wrappers over framework-agnostic cores in the library (`serving.py`, `feedback.py`, `training.py`) so the logic is unit-tested without standing up servers.
 
 Library modules (`src/cv_fp_lab/`):
 - `config.py` — loads `configs/pipeline.yaml`; scripts read all tunables from there (paths, sample counts, UMAP/HDBSCAN params, W&B project).
@@ -52,14 +58,19 @@ Library modules (`src/cv_fp_lab/`):
 - `embeddings.py` — `extract_embeddings(paths, method)`. `"simple"` (default) is a deterministic offline descriptor; `"clip"` is a deliberate `NotImplementedError` extension point (needs the `clip` optional extra: `uv sync --extra clip`).
 - `clustering.py` — `reduce_umap` and `cluster_embeddings` both **degrade gracefully**: UMAP falls back to SVD, HDBSCAN falls back to KMeans, and both handle empty/single-element inputs. Preserve these fallbacks — they are why the demo runs anywhere and are directly tested.
 - `labelstudio.py` — `LABEL_CONFIG` (the review UI XML), `dataframe_to_labelstudio_tasks` (export; passes through optional `uncertainty`/`acquisition_rank`), `parse_labelstudio_export` (import reviewer annotations into a DataFrame).
-- `active_learning.py` — `uncertainty_scores` (least-confidence/margin/entropy over `pred_confidence` as P(positive)), `rank_with_diversity` (round-robin across clusters; `cluster_id == -1` noise points compete as singletons), `select_for_review`. Drives the `--budget/--strategy/--no-diversity` flags on script 03; config under `active_learning:`. This is the implemented selection half of active learning — ML backend + webhook retraining remain future work (see `active_learning.md`).
+- `active_learning.py` — `uncertainty_scores` (least-confidence/margin/entropy over `pred_confidence` as P(positive)), `rank_with_diversity` (round-robin across clusters; `cluster_id == -1` noise points compete as singletons), `select_for_review`. Drives the `--budget/--strategy/--no-diversity` flags on script 03; config under `active_learning:`. The selection half of active learning.
+- `detector.py` — `FpDetector`: sklearn `StandardScaler + LogisticRegression` predicting `fp_type` from embeddings. Provides hold-out metrics (`train` refits on all data after evaluating), `confidence`, normalized-entropy `uncertainty`, and joblib `save`/`load`. This is the trainable/servable model for Phases 2–3.
+- `registry.py` — `LocalModelRegistry`: filesystem model store (`<root>/models/<version>/`, `aliases.json`) with `candidate/staging/production` stages. `maybe_promote` registers a candidate and promotes only if its `metric_key` beats production by `min_delta` (offline stand-in for the W&B Registry).
+- `training.py` — `assemble_training_data` (bootstrap labels from `synthetic_fp_type`, override with human `review_fp_type`) and `retrain_and_register` (train → gate-promote).
+- `serving.py` — `predict_tasks` maps Label Studio tasks to ML-backend predictions (embed image → classify → LS choices + score + uncertainty meta).
+- `feedback.py` — `parse_annotation_event` (LS webhook → `{event_id, review_fp_type}`) and `ReviewBatcher` (dedupe + threshold debounce for retraining).
 - `wandb_logging.py` — logs the reviewed (or clustered) CSV as a Table and bundles `data/processed/` into a dataset Artifact.
 
 ## Conventions
 
 - The package lives under `src/` (`tool.setuptools.packages.find` + pytest `pythonpath = ["src"]`); scripts add `src` to `sys.path` manually.
-- Default to offline/CPU. W&B defaults to `WANDB_MODE=offline`; override with `WANDB_MODE=online WANDB_PROJECT=...`. Optional heavy deps (torch/transformers) live behind the `clip` extra.
+- Default to offline/CPU. W&B defaults to `WANDB_MODE=offline`; override with `WANDB_MODE=online WANDB_PROJECT=...`. Heavy/optional deps live behind extras: torch/transformers in `clip`, Flask (for the services) in `serve`.
 - Add new tunables to `configs/pipeline.yaml` rather than hardcoding in scripts.
-- New library code should keep the same graceful-fallback style so the offline demo and CI never require GPU or network.
+- New library code should keep the same graceful-fallback style so the offline demo and CI never require GPU or network. Keep HTTP services as thin wrappers over testable library cores.
 
-Background and design notes live in `docs/` (`architecture.md`, `fp_taxonomy.md`, `hybrid_k8s_architecture.md`, `label_studio_setup.md`, `active_learning.md`). Note: the current loop is model-assisted curation (pre-annotations + clustering), **not** closed active learning; `active_learning.md` describes how to close it (Label Studio ML backend + uncertainty ranking + webhook-triggered retraining).
+Background and design notes live in `docs/` (`architecture.md`, `fp_taxonomy.md`, `hybrid_k8s_architecture.md`, `label_studio_setup.md`, `active_learning.md`). The active-learning loop is implemented end-to-end offline: selection (script 03), serving (`services/ml_backend.py`), and webhook retraining (`services/webhook.py`); `active_learning.md` documents the design and the production hardening still left (W&B-backed registry, GPU serving, dataset validation, Kubernetes).

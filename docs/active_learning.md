@@ -51,7 +51,25 @@ flowchart LR
     style LS fill:#171717,stroke:#d0d0d0,color:#f5f5f5;
 ```
 
-## Components to add
+## Implementation status
+
+All three components below now run offline in this repo:
+
+- **Detector** — `cv_fp_lab/detector.py` (`FpDetector`): a `fp_type` classifier over
+  embeddings, with hold-out metrics, confidence, and normalized-entropy uncertainty.
+- **Registry** — `cv_fp_lab/registry.py` (`LocalModelRegistry`): filesystem versions +
+  `candidate/staging/production` aliases + a metric-gated `maybe_promote`.
+- **Phase 1 (selection)** — `cv_fp_lab/active_learning.py` + script 03 flags (see below).
+- **Phase 2 (serving)** — `services/ml_backend.py` over `cv_fp_lab/serving.py`.
+- **Phase 3 (retraining)** — `services/webhook.py` over `cv_fp_lab/feedback.py` +
+  `cv_fp_lab/training.py`.
+
+Bootstrap the first model with `scripts/06_train_detector.py`; run the services with
+the `serve` extra (`uv sync --extra serve`). The notes below describe the design and
+the production hardening still left (W&B-backed registry, GPU serving, dataset
+validation, Kubernetes deployment).
+
+## Components
 
 ### 1. Label Studio ML backend
 
@@ -143,6 +161,14 @@ The *selection* half runs offline today, without standing up any server:
    informativeness. Defaults (no budget) export everything, keeping the demo/CI chain
    intact. Config defaults live under `active_learning:` in `configs/pipeline.yaml`.
 
-Still to do (production extensions): the **ML backend** (§1) and **webhook-driven
-retraining** (§3) above. Those require a servable detector, so they come after a
-trainable model is added.
+## Production hardening still left
+
+The offline loop is complete; turning it into production involves swapping the local
+pieces for managed ones:
+
+- Replace `LocalModelRegistry` with the W&B Model Registry (Artifacts + aliases).
+- Serve the detector on a GPU node pool; embed via CLIP/DINOv2 instead of `simple`.
+- Have the webhook run the dataset builder + schema/bbox validation before retraining,
+  and submit retraining as an Argo Workflow / Kubernetes `Job` rather than in-process.
+- Add idempotency by `(event_id, annotation_id)` and a human approval gate on
+  `staging → production`.

@@ -159,7 +159,11 @@ cv-fp-mining-lab/
 │   ├── 02_cluster_false_positives.py
 │   ├── 03_export_for_label_studio.py
 │   ├── 04_import_label_studio_export.py
-│   └── 05_log_to_wandb.py
+│   ├── 05_log_to_wandb.py
+│   └── 06_train_detector.py
+├── services/
+│   ├── ml_backend.py          # Label Studio ML backend (Phase 2)
+│   └── webhook.py             # retrain-trigger receiver (Phase 3)
 └── src/cv_fp_lab/
     ├── config.py
     ├── dataset.py
@@ -167,6 +171,11 @@ cv-fp-mining-lab/
     ├── clustering.py
     ├── labelstudio.py
     ├── active_learning.py
+    ├── detector.py            # fp_type classifier over embeddings
+    ├── registry.py            # local model registry + promotion gate
+    ├── training.py            # label assembly + retrain/register
+    ├── serving.py             # tasks -> ML-backend predictions
+    ├── feedback.py            # webhook parsing + batching
     ├── wandb_logging.py
     └── utils.py
 ```
@@ -269,9 +278,9 @@ data/processed/labelstudio_tasks.json     # tasks (carry uncertainty + acquisiti
 data/processed/labelstudio_ranking.csv    # event_id, cluster_id, confidence, uncertainty, rank
 ```
 
-This is the implemented "selection" half of the [active learning loop](#active-learning-loop-extension);
-the ML backend and webhook-triggered retraining remain extension points
-(see [`docs/active_learning.md`](docs/active_learning.md)).
+This is the "selection" half of the [active learning loop](#active-learning-loop-extension);
+the ML backend and webhook-triggered retraining are implemented too — see
+[Live model serving and retraining loop](#live-model-serving-and-retraining-loop-phases-23).
 
 ### 6. Import reviewed Label Studio export
 
@@ -302,6 +311,53 @@ To use your own W&B project:
 wandb login
 WANDB_MODE=online WANDB_PROJECT=cv-fp-mining-lab uv run python scripts/05_log_to_wandb.py
 ```
+
+### 8. Train the detector and promote it
+
+Train the `fp_type` classifier from current labels (bootstrapped from operator
+labels, refined by any review export), evaluate on a hold-out, and gate-promote
+it in the local model registry:
+
+```bash
+uv run python scripts/06_train_detector.py
+```
+
+Outputs a versioned model under `data/processed/model_registry/` with
+`candidate → staging → production` aliases. This is the trainable, servable model
+behind Phases 2–3.
+
+## Live model serving and retraining loop (Phases 2–3)
+
+The closed [active-learning loop](#active-learning-loop-extension) is implemented
+as two small Flask services (optional `serve` extra), backed by the detector and
+local registry:
+
+```bash
+uv sync --extra serve
+```
+
+**Phase 2 — Label Studio ML backend** serves the production detector so the review
+UI shows live `fp_type` pre-labels, a confidence score, and an `uncertainty` meta
+field for sorting:
+
+```bash
+uv run python services/ml_backend.py     # http://localhost:9090
+# POST {"tasks": [...]} to /predict ; GET /health
+```
+
+Point a Label Studio project's ML backend at this URL.
+
+**Phase 3 — retrain webhook** receives `ANNOTATION_CREATED` events, debounces them
+into batches, then retrains → evaluates → gate-promotes a new model version. The
+ML backend serves whatever is promoted to `production` next:
+
+```bash
+uv run python services/webhook.py        # http://localhost:9091
+# Label Studio webhook -> POST /webhook
+```
+
+Under Docker Compose both run as services (`ml-backend`, `webhook`). See
+[`docs/active_learning.md`](docs/active_learning.md) for the design.
 
 ## Label Studio integration concept
 
