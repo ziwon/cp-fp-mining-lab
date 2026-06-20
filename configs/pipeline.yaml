@@ -33,6 +33,24 @@ active_learning:
   strategy: entropy  # least_confidence | margin | entropy
   diversity: true    # round-robin across clusters so one cluster cannot dominate
 
+detector:
+  registry_dir: data/processed/model_registry
+  metric_key: macro_f1
+  # candidate must beat production by this margin to be promoted
+  promotion_min_delta: 0.0
+
+serving:
+  # Label Studio ML backend (Phase 2)
+  host: 0.0.0.0
+  port: 9090
+  model_alias: production
+
+webhook:
+  # retrain trigger receiver (Phase 3)
+  host: 0.0.0.0
+  port: 9091
+  batch_threshold: 10
+
 wandb:
   project: cv-fp-mining-lab
   entity: null
