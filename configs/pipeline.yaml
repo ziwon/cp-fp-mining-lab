@@ -26,6 +26,13 @@ clustering:
   hdbscan_min_cluster_size: 5
   hdbscan_min_samples: 3
 
+active_learning:
+  # null budget exports every task (default demo); set an int to send only the
+  # top-N most informative tasks to review.
+  budget: null
+  strategy: entropy  # least_confidence | margin | entropy
+  diversity: true    # round-robin across clusters so one cluster cannot dominate
+
 wandb:
   project: cv-fp-mining-lab
   entity: null

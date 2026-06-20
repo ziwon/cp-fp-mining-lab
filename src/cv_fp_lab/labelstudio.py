@@ -42,17 +42,24 @@ LABEL_CONFIG = """
 def dataframe_to_labelstudio_tasks(df: pd.DataFrame, output_path: str | Path) -> list[dict[str, Any]]:
     tasks = []
     for row in df.to_dict(orient="records"):
+        data = {
+            "image": row["image_path"],
+            "event_id": row["event_id"],
+            "camera_id": row["camera_id"],
+            "site_id": row["site_id"],
+            "pred_class": row["pred_class"],
+            "pred_confidence": row["pred_confidence"],
+            "cluster_id": int(row.get("cluster_id", -1)),
+        }
+        # Active-learning fields are optional; include them so reviewers can sort
+        # tasks by informativeness in Label Studio when ranking has been applied.
+        if "uncertainty" in row and pd.notna(row["uncertainty"]):
+            data["uncertainty"] = round(float(row["uncertainty"]), 4)
+        if "acquisition_rank" in row and pd.notna(row["acquisition_rank"]):
+            data["acquisition_rank"] = int(row["acquisition_rank"])
         tasks.append(
             {
-                "data": {
-                    "image": row["image_path"],
-                    "event_id": row["event_id"],
-                    "camera_id": row["camera_id"],
-                    "site_id": row["site_id"],
-                    "pred_class": row["pred_class"],
-                    "pred_confidence": row["pred_confidence"],
-                    "cluster_id": int(row.get("cluster_id", -1)),
-                },
+                "data": data,
                 "predictions": [
                     {
                         "model_version": row.get("model_version", "unknown"),

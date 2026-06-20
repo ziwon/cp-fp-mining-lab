@@ -28,6 +28,18 @@ PRED_CLASS_BY_FP = {
     "animal": "intrusion",
 }
 
+# Per-FP-type detector confidence ranges. Ambiguous classes (reflection, shadow)
+# sit near the decision boundary so uncertainty-based ranking surfaces them first;
+# clear-cut classes (steam, fog) score high and confident.
+CONFIDENCE_BY_FP = {
+    "steam": (0.80, 0.96),
+    "fog": (0.78, 0.95),
+    "headlight": (0.60, 0.80),
+    "animal": (0.62, 0.82),
+    "reflection": (0.52, 0.70),
+    "shadow": (0.50, 0.68),
+}
+
 
 def _draw_pattern(draw: ImageDraw.ImageDraw, fp_type: str, size: int, rng: random.Random) -> tuple[int, int, int, int]:
     color = FP_COLORS[fp_type]
@@ -91,7 +103,7 @@ def generate_sample_data(raw_dir: str | Path, fp_types: list[str], samples_per_t
                     "site_id": f"site-{rng.randint(1, 3):02d}",
                     "timestamp": f"2026-06-{rng.randint(1, 15):02d}T{rng.randint(0, 23):02d}:{rng.randint(0, 59):02d}:00+09:00",
                     "pred_class": PRED_CLASS_BY_FP[fp_type],
-                    "pred_confidence": round(rng.uniform(0.55, 0.96), 3),
+                    "pred_confidence": round(rng.uniform(*CONFIDENCE_BY_FP[fp_type]), 3),
                     "bbox_x0": bbox[0],
                     "bbox_y0": bbox[1],
                     "bbox_x1": bbox[2],
