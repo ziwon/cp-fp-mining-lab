@@ -46,6 +46,28 @@ def assemble_training_data(
     return embeddings[keep], labels[keep].to_numpy(), events.loc[keep, "event_id"].tolist()
 
 
+def persist_review_labels(
+    path: str | Path,
+    reviews: dict[str, str | None],
+    review_label: str = "review_fp_type",
+) -> pd.DataFrame:
+    """Merge reviewed labels into a CSV the trainer reads, keyed by event_id.
+
+    Accumulates across batches (existing rows are kept) and lets a re-reviewed
+    event overwrite its earlier label. Rows without a label are dropped.
+    """
+    path = Path(path)
+    rows = [{"event_id": k, review_label: v} for k, v in reviews.items() if v]
+    new = pd.DataFrame(rows, columns=["event_id", review_label])
+    if path.exists():
+        old = pd.read_csv(path)
+        new = pd.concat([old, new], ignore_index=True)
+    merged = new.drop_duplicates(subset=["event_id"], keep="last").reset_index(drop=True)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    merged.to_csv(path, index=False)
+    return merged
+
+
 def retrain_and_register(
     registry: LocalModelRegistry,
     events_csv: str | Path,

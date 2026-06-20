@@ -22,7 +22,8 @@ from flask import Flask, jsonify, request
 from cv_fp_lab.config import load_config
 from cv_fp_lab.feedback import ReviewBatcher, parse_annotation_event
 from cv_fp_lab.registry import LocalModelRegistry
-from cv_fp_lab.training import retrain_and_register
+from cv_fp_lab.training import persist_review_labels, retrain_and_register
+from cv_fp_lab.wandb_logging import log_retrain_run
 
 
 def create_app() -> Flask:
@@ -44,20 +45,32 @@ def create_app() -> Flask:
         if parsed is None:
             return jsonify({"ignored": True, "pending": batcher.pending})
 
-        batcher.add(parsed["event_id"])
+        batcher.add(parsed["event_id"], parsed["review_fp_type"])
         response = {"queued": parsed["event_id"], "pending": batcher.pending, "retrained": False}
 
         if batcher.ready():
-            batch = batcher.drain()
+            reviews = batcher.drain()
+            # Persist the corrected labels so the retrain actually learns from them.
+            reviews_csv = processed_dir / "webhook_reviews.csv"
+            persist_review_labels(reviews_csv, reviews)
             result = retrain_and_register(
                 registry,
                 events_csv=Path(cfg["embedding"]["metadata_file"]),
                 embeddings_npy=Path(cfg["embedding"]["output_file"]),
-                reviewed_csv=processed_dir / "reviewed_fp_samples.csv",
+                reviewed_csv=reviews_csv,
                 metric_key=dcfg["metric_key"],
                 min_delta=dcfg["promotion_min_delta"],
             )
-            response.update(retrained=True, batch_size=len(batch), result=result)
+            # Log the retrain as a W&B run (no-op offline / if wandb unavailable).
+            try:
+                result["wandb_url"] = log_retrain_run(
+                    project=cfg["wandb"]["project"],
+                    result=result,
+                    registry_dir=dcfg["registry_dir"],
+                )
+            except Exception as exc:  # keep the loop alive if W&B is down
+                result["wandb_error"] = str(exc)
+            response.update(retrained=True, batch_size=len(reviews), result=result)
 
         response["pending"] = batcher.pending
         return jsonify(response)

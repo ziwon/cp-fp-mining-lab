@@ -33,20 +33,21 @@ def parse_annotation_event(payload: dict[str, Any]) -> dict[str, Any] | None:
 
 
 class ReviewBatcher:
-    """Accumulate reviewed events and signal when a retrain batch is ready.
+    """Accumulate reviewed events with their labels and signal when a batch is ready.
 
     Debounces retraining so it fires once per ``threshold`` new annotations rather
-    than on every single review. De-duplicates by event id.
+    than on every single review. De-duplicates by event id, keeping the latest
+    label so a re-reviewed event overwrites its earlier decision.
     """
 
     def __init__(self, threshold: int = 10) -> None:
         if threshold < 1:
             raise ValueError("threshold must be >= 1")
         self.threshold = threshold
-        self._pending: set[str] = set()
+        self._pending: dict[str, str | None] = {}
 
-    def add(self, event_id: str) -> None:
-        self._pending.add(event_id)
+    def add(self, event_id: str, label: str | None = None) -> None:
+        self._pending[event_id] = label
 
     @property
     def pending(self) -> int:
@@ -55,7 +56,7 @@ class ReviewBatcher:
     def ready(self) -> bool:
         return self.pending >= self.threshold
 
-    def drain(self) -> list[str]:
-        items = sorted(self._pending)
+    def drain(self) -> dict[str, str | None]:
+        items = dict(self._pending)
         self._pending.clear()
         return items

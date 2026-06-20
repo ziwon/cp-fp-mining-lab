@@ -33,12 +33,13 @@ def test_parse_requires_event_id() -> None:
 
 def test_batcher_dedupes_and_signals_threshold() -> None:
     b = ReviewBatcher(threshold=3)
-    b.add("a")
-    b.add("a")  # duplicate
-    b.add("b")
+    b.add("a", "steam")
+    b.add("a", "fog")  # re-review overwrites the label
+    b.add("b", "shadow")
     assert b.ready() is False
-    b.add("c")
+    b.add("c", "animal")
     assert b.ready() is True
-    assert b.drain() == ["a", "b", "c"]
+    drained = b.drain()
+    assert drained == {"a": "fog", "b": "shadow", "c": "animal"}
     assert b.pending == 0
     assert b.ready() is False

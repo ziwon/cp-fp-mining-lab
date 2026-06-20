@@ -56,6 +56,11 @@ services:
     command: python services/webhook.py
     environment:
       PYTHONPATH: /app/src
+      # Retrains log to the self-hosted W&B (offline unless an API key is set).
+      WANDB_MODE: ${WANDB_MODE:-offline}
+      WANDB_PROJECT: ${WANDB_PROJECT:-cv-fp-mining-lab}
+      WANDB_BASE_URL: ${WANDB_BASE_URL:-http://wandb:8080}
+      WANDB_API_KEY: ${WANDB_API_KEY:-}
     ports:
       - "${WEBHOOK_PORT:-9091}:9091"
     volumes:
