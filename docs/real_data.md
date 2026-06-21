@@ -75,11 +75,19 @@ sources dominate:
 The crop of each FP region becomes a review task — the real analogue of the
 synthetic steam/reflection/headlight samples.
 
+## Trained detector
+
+A yolov8n trained on full D-Fire (17,221 train / 4,306 val, 50 epochs) on an
+RTX 5080 reaches **P 0.77, R 0.70, mAP@50 0.77, mAP@50-95 0.45** on the test set —
+in line with published D-Fire results. With this detector, mining at the normal
+`conf=0.25` yields realistic confusions (mislocalized boxes + clouds/lights),
+unlike the underfit smoke-test model that only fired at `conf≈0.01`.
+
 ## Notes & next steps
 
 - An **underfit** detector (few epochs) yields *more* FPs — useful for exercising
   the loop, but use a properly trained detector and a sane `mining.conf` for real
-  curation.
+  curation (the config defaults to full D-Fire + 50 epochs).
 - `simple` embeddings (color/edge histograms) cannot separate real FP types well;
   clusters collapse. **Step 3 (done)** implements the `clip` path
   (`uv sync --extra clip`, then `--method clip` on script 01): on the 244 mined

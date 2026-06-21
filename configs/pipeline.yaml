@@ -37,9 +37,10 @@ active_learning:
   diversity: true    # round-robin across clusters so one cluster cannot dominate
 
 dfire:
-  # Real fire/smoke object-detection data (YOLO format). Override to the full set.
-  root: /data/vrs/dfire-300-stratified
-  train_dir: /data/vrs/dfire-300-stratified
+  # Real fire/smoke object-detection data (YOLO format).
+  # Use dfire-300-stratified for a fast CPU smoke test; full D-Fire/train for real.
+  root: /data/vrs/D-Fire
+  train_dir: /data/vrs/D-Fire/train
   val_dir: /data/vrs/D-Fire/test
   data_yaml: data/processed/dfire.yaml
   classes:
@@ -49,13 +50,13 @@ dfire:
 yolo:
   # Heavy artifacts live on /data (the workspace disk is small on this host).
   base_weights: /data/cpfp-output/yolov8n.pt
-  epochs: 30
+  epochs: 50
   imgsz: 640
-  batch: 16
+  batch: 32
   device: cpu        # set to 0 for the first CUDA GPU (needs CUDA-enabled torch)
   runs_dir: /data/cpfp-output/yolo_runs
-  run_name: dfire
-  weights: /data/cpfp-output/yolo_runs/dfire/weights/best.pt
+  run_name: dfire-full
+  weights: /data/cpfp-output/yolo_runs/dfire-full/weights/best.pt
 
 mining:
   # Harvest false positives by running the detector over a split.
