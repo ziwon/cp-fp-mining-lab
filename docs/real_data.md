@@ -16,10 +16,27 @@ This is steps 1–2 of the production-hardening plan in
 uv sync --extra detect          # adds ultralytics (pulls torch)
 ```
 
-GPU: set `yolo.device: 0` in `configs/pipeline.yaml`. CPU works for small subsets.
-For NVIDIA Blackwell (RTX 50xx, sm_120) you need a CUDA 12.8+ torch build; CPU
-torch (`--extra-index-url https://download.pytorch.org/whl/cpu`) sidesteps wheel
-mismatches for verification.
+CPU works for small subsets. For GPU, set `yolo.device: 0` (and
+`embedding.device: cuda`) in `configs/pipeline.yaml`.
+
+### GPU setup (NVIDIA Blackwell, RTX 50xx / sm_120)
+
+Blackwell needs a recent CUDA torch build (the default PyPI torch fails with a
+sm_120 kernel mismatch). With driver 580+ (CUDA 13 capable), a dedicated GPU venv:
+
+```bash
+uv venv .venv-gpu --python 3.10
+uv pip install --python .venv-gpu/bin/python --index-strategy unsafe-best-match \
+  --index-url https://download.pytorch.org/whl/cu128 \
+  --extra-index-url https://pypi.org/simple \
+  torch torchvision -e . ultralytics "transformers>=4.40,<5"
+# verify
+.venv-gpu/bin/python -c "import torch; print(torch.__version__, torch.cuda.is_available())"
+```
+
+Verified on an RTX 5080: torch 2.12.1+cu130, `cuda available: True`, capability
+(12, 0); CLIP embeds ~35 img/s and YOLO predicts on `device=0`. On this host the
+GPU venv lives at `/data/venvs/cpfp-gpu` (small workspace disk).
 
 ## Configure
 
