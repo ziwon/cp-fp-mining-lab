@@ -38,6 +38,19 @@ LABEL_CONFIG = """
 </View>
 """.strip()
 
+FP_TYPE_CHOICES = {
+    "steam",
+    "fog",
+    "dust",
+    "reflection",
+    "headlight",
+    "shadow",
+    "sitting",
+    "animal",
+    "authorized_worker",
+    "unknown",
+}
+
 
 def _to_local_files_url(image_path: str, url_prefix: str, strip: str) -> str:
     """Rewrite a local image path to a Label Studio local-files serving URL.
@@ -81,14 +94,25 @@ def dataframe_to_labelstudio_tasks(
             data["uncertainty"] = round(float(row["uncertainty"]), 4)
         if "acquisition_rank" in row and pd.notna(row["acquisition_rank"]):
             data["acquisition_rank"] = int(row["acquisition_rank"])
+        pred_label = row.get("synthetic_fp_type", row.get("pred_class"))
+        result = []
+        if pd.notna(pred_label) and str(pred_label) in FP_TYPE_CHOICES:
+            result = [
+                {
+                    "from_name": "fp_type",
+                    "to_name": "image",
+                    "type": "choices",
+                    "value": {"choices": [str(pred_label)]},
+                }
+            ]
         tasks.append(
             {
                 "data": data,
                 "predictions": [
                     {
                         "model_version": row.get("model_version", "unknown"),
-                        "score": row.get("pred_confidence", 0.0),
-                        "result": [],
+                        "score": float(row.get("pred_confidence", 0.0)),
+                        "result": result,
                     }
                 ],
             }

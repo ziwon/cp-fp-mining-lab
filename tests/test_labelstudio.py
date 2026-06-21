@@ -17,6 +17,7 @@ def test_labelstudio_task_export_and_review_parse(tmp_path) -> None:
                 "pred_class": "smoke",
                 "pred_confidence": 0.9,
                 "cluster_id": 3,
+                "synthetic_fp_type": "steam",
                 "model_version": "detector-test",
             }
         ]
@@ -27,6 +28,7 @@ def test_labelstudio_task_export_and_review_parse(tmp_path) -> None:
     assert tasks_path.exists()
     assert tasks[0]["data"]["cluster_id"] == 3
     assert tasks[0]["predictions"][0]["model_version"] == "detector-test"
+    assert tasks[0]["predictions"][0]["result"][0]["value"]["choices"] == ["steam"]
 
     tasks[0]["annotations"] = [
         {
