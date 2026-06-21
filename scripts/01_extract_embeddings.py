@@ -22,8 +22,15 @@ def main() -> None:
     if not metadata_file.exists():
         raise FileNotFoundError("Run scripts/00_generate_sample_data.py first")
 
+    ecfg = cfg["embedding"]
     df = pd.read_csv(metadata_file)
-    embeddings = extract_embeddings(df["image_path"].tolist(), method=method)
+    embeddings = extract_embeddings(
+        df["image_path"].tolist(),
+        method=method,
+        clip_model=ecfg.get("clip_model", "openai/clip-vit-base-patch32"),
+        device=ecfg.get("device"),
+        batch_size=ecfg.get("batch_size", 32),
+    )
     out = Path(cfg["embedding"]["output_file"])
     out.parent.mkdir(parents=True, exist_ok=True)
     np.save(out, embeddings)

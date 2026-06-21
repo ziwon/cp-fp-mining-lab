@@ -16,9 +16,12 @@ sample_data:
     - animal
 
 embedding:
-  method: simple
+  method: simple   # simple | clip (clip needs `uv sync --extra clip`)
   output_file: data/processed/embeddings.npy
   metadata_file: data/processed/fp_events.csv
+  clip_model: openai/clip-vit-base-patch32
+  device: null     # null = auto (cuda if available, else cpu)
+  batch_size: 32
 
 clustering:
   umap_neighbors: 10

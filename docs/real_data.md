@@ -64,8 +64,11 @@ synthetic steam/reflection/headlight samples.
   the loop, but use a properly trained detector and a sane `mining.conf` for real
   curation.
 - `simple` embeddings (color/edge histograms) cannot separate real FP types well;
-  clusters collapse. This motivates **step 3** — implement the `clip` embedding
-  path (`embeddings.py`) with CLIP/DINOv2 for meaningful clusters.
+  clusters collapse. **Step 3 (done)** implements the `clip` path
+  (`uv sync --extra clip`, then `--method clip` on script 01): on the 244 mined
+  D-Fire FPs, CLIP took HDBSCAN from 2 collapsed clusters to 9, with fire FPs
+  separating into their own clusters. (Euclidean silhouette undersells CLIP since
+  it lives in cosine space — judge by cluster structure, not euclidean distance.)
 - **Step 4**: gate retraining on a frozen eval set (D-Fire `test` + the
   `verifier-eval` video clips) with mAP / per-class recall / FP-rate, not the
   current hold-out accuracy.

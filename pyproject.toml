@@ -21,7 +21,8 @@ dependencies = [
 clip = [
     "torch>=2.1",
     "torchvision>=0.16",
-    "transformers>=4.40",
+    # 5.x changed the CLIP get_image_features return type; pin to the stable API.
+    "transformers>=4.40,<5",
 ]
 serve = [
     "flask>=3.0",
