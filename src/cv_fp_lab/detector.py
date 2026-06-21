@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
+from sklearn.dummy import DummyClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, f1_score
 from sklearn.model_selection import train_test_split
@@ -62,16 +63,27 @@ class FpDetector:
         classes = sorted(set(y.tolist()))
 
         def _make() -> Pipeline:
+            clf = (
+                DummyClassifier(strategy="most_frequent")
+                if len(classes) == 1
+                else LogisticRegression(max_iter=1000, C=1.0)
+            )
             return Pipeline(
                 [
                     ("scaler", StandardScaler()),
-                    ("clf", LogisticRegression(max_iter=1000, C=1.0)),
+                    ("clf", clf),
                 ]
             )
 
         metrics: dict[str, float] = {"n_samples": float(len(x)), "n_classes": float(len(classes))}
         _, counts = np.unique(y, return_counts=True)
-        can_split = len(classes) > 1 and counts.min() >= 2 and len(x) >= 8
+        n_test = int(np.ceil(test_size * len(x))) if isinstance(test_size, float) else int(test_size)
+        can_split = (
+            len(classes) > 1
+            and counts.min() >= 2
+            and n_test >= len(classes)
+            and len(x) - n_test >= len(classes)
+        )
         if can_split:
             x_tr, x_te, y_tr, y_te = train_test_split(
                 x, y, test_size=test_size, random_state=seed, stratify=y

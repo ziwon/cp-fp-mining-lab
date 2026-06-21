@@ -38,3 +38,25 @@ def test_save_load_roundtrip(tmp_path) -> None:
     assert loaded.model_version == det.model_version
     assert loaded.classes == det.classes
     np.testing.assert_array_equal(loaded.predict(x), det.predict(x))
+
+
+def test_train_handles_small_many_class_dataset_without_holdout() -> None:
+    rng = np.random.default_rng(0)
+    x = rng.normal(size=(12, 3))
+    y = np.array(["a", "a", "b", "b", "c", "c", "d", "d", "e", "e", "f", "f"])
+
+    det = FpDetector.train(x, y)
+
+    assert set(det.classes) == set(y)
+    assert det.metrics["n_eval"] == 0.0
+
+
+def test_train_handles_single_class_dataset() -> None:
+    x = np.random.default_rng(0).normal(size=(5, 3))
+    y = np.array(["steam"] * 5)
+
+    det = FpDetector.train(x, y)
+
+    assert det.classes == ["steam"]
+    assert det.predict(x).tolist() == ["steam"] * 5
+    assert det.uncertainty(x).tolist() == [0.0] * 5
