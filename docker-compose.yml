@@ -117,6 +117,7 @@ services:
       - "${FILESERVER_PORT:-18090}:80"
     volumes:
       - ./data:/usr/share/nginx/html:ro
+      - ./docker/fileserver.conf:/etc/nginx/conf.d/default.conf:ro
 
   # Self-hosted Weights & Biases Server (single-container "local" image).
   # First run: open the UI, create a user, copy the API key into .env
