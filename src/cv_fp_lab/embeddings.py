@@ -6,6 +6,9 @@ import numpy as np
 from PIL import Image
 
 
+SIMPLE_EMBEDDING_DIM = 260
+
+
 def simple_image_embedding(image_path: str | Path) -> np.ndarray:
     """Small, deterministic image descriptor for offline demos.
 
@@ -93,6 +96,8 @@ def extract_embeddings(
     batch_size: int = 32,
 ) -> np.ndarray:
     if method == "simple":
+        if not image_paths:
+            return np.empty((0, SIMPLE_EMBEDDING_DIM), dtype=np.float32)
         return np.vstack([simple_image_embedding(p) for p in image_paths])
     if method == "clip":
         return clip_image_embeddings(image_paths, clip_model, device, batch_size)
