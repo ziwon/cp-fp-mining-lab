@@ -146,12 +146,14 @@ cv-fp-mining-lab/
 │   ├── processed/            # embeddings, clusters, datasets
 │   └── labelstudio_exports/  # sample Label Studio export JSON
 ├── docs/
+│   ├── README.md
 │   ├── active_learning.md
 │   ├── architecture.md
 │   ├── demo_walkthrough.md
 │   ├── fp_taxonomy.md
 │   ├── hybrid_k8s_architecture.md
-│   └── label_studio_setup.md
+│   ├── label_studio_setup.md
+│   └── real_data.md
 ├── notebooks/
 │   └── 01_fp_clustering.ipynb
 ├── scripts/
@@ -193,7 +195,7 @@ tasks, with the synthetic FP image, model metadata (`event_id`, `camera_id`,
 `pred_class`), and the reviewer's verdict. Images are served over HTTP by the
 `fileserver` container so they render directly in the UI.
 
-![Label Studio review queue](docs/assets/labelling-all-tasks.png)
+![Label Studio review queue](docs/assets/ls-labelling.png)
 
 **Model lineage in self-hosted W&B.** Each review batch triggers a `retrain` run;
 the charts compare runs side by side — `macro_f1`/`accuracy` (model quality),
@@ -453,13 +455,36 @@ W&B is used as the lineage and analysis layer:
 - **Runs**: `mine-fp`, `build-hardneg`, `yolo-retrain`, `eval-gate`, plus synthetic retrain demos
 - **Registry**: local `LocalModelRegistry` now; W&B Registry or equivalent aliases in production
 
-## Suggested next steps
+## Future works
 
-- Add production event metadata from PostgreSQL or Kafka.
-- Replace D-Fire paths with production CCTV/object-storage paths.
-- Use DINOv2 embeddings as a stronger alternative to CLIP for FP crop grouping.
-- Add FiftyOne for visual error analysis.
-- Promote the script chain to Argo/Airflow/Kubernetes Jobs with the same inputs/outputs.
+The current real-data loop is functional: mine real FP crops, review them in Label
+Studio, build hard negatives, retrain YOLO, log lineage to W&B, and protect
+production with a promotion gate. The remaining work is quality hardening and
+production migration.
+
+- **Clean hard-negative curation.** Build filtered hard-negative datasets from
+  reviewer-confirmed `false_positive` rows only, excluding `uncertain`, true
+  events, low-quality crops, and broad `unknown` labels unless explicitly needed.
+- **Hard-negative sampling controls.** Add knobs for FP type allowlists, per-type
+  caps, empty-label ratio, and oversampling so retraining can reduce FP rate
+  without sacrificing fire/smoke recall.
+- **Full-frame review context.** Show the source frame with the predicted bbox
+  overlay alongside the crop, then rename or refine `bbox_valid` into a clearer
+  detection-issue field.
+- **W&B training curves.** Parse Ultralytics `results.csv` and upload epoch-level
+  loss/mAP curves plus `results.png`, so retrain runs are comparable without
+  opening local run folders.
+- **Real online loop.** Connect the Label Studio ML backend and webhook path to
+  the real YOLO detector, not only the synthetic sklearn smoke-test detector.
+- **Production data integration.** Replace D-Fire paths with CCTV/object-storage
+  paths and attach production metadata from PostgreSQL, Kafka, or the event store.
+- **Orchestration.** Promote the script chain to Argo Workflows, Airflow, or
+  Kubernetes Jobs using the same file contracts and W&B artifacts.
+- **Registry migration.** Keep `LocalModelRegistry` for local demos, but map
+  candidate/staging/production aliases to W&B Registry or an internal model
+  registry before production use.
+- **Error-analysis tooling.** Add FiftyOne or an equivalent visual QA layer for
+  inspecting false positives, false negatives, bbox errors, and per-camera drift.
 
 ## References to study
 
