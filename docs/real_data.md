@@ -94,6 +94,29 @@ unlike the underfit smoke-test model that only fired at `conf≈0.01`.
   D-Fire FPs, CLIP took HDBSCAN from 2 collapsed clusters to 9, with fire FPs
   separating into their own clusters. (Euclidean silhouette undersells CLIP since
   it lives in cosine space — judge by cluster structure, not euclidean distance.)
-- **Step 4**: gate retraining on a frozen eval set (D-Fire `test` + the
-  `verifier-eval` video clips) with mAP / per-class recall / FP-rate, not the
-  current hold-out accuracy.
+## Detection-aware promotion gate (step 4)
+
+`scripts/13_evaluate_and_gate.py` (`just eval-gate`) replaces the single-scalar
+hold-out gate with a multi-criteria check on the frozen eval set
+(`detection_eval` + `gating`). A candidate is promoted only if it clears **all**:
+
+- **mAP@50** doesn't regress (`gate.map50_min_delta`),
+- **per-class recall** stays above the floor vs production (`gate.recall_min_delta`)
+  — keeps detecting real fire *and* smoke,
+- **negative-image FP-rate** doesn't increase (`gate.fp_rate_max_delta`) — the
+  cost FP mining is meant to drive down.
+
+Why multi-criteria matters: an underfit model that detects *nothing* has a perfect
+FP-rate (zero false positives) and would sail through an FP-only gate. Verified on
+real models — the underfit 300-image detector (mAP 0.008, recall ~0,
+neg_fp_rate 0.000) was **rejected on mAP and per-class recall** against the full
+detector (mAP 0.69, recall 0.75, neg_fp_rate 0.016), so production was protected.
+
+Promoted detectors are stored in `gate.registry_dir` (`LocalModelRegistry.register_file`,
+`.pt` artifacts with `candidate/staging/production` aliases).
+
+## Remaining
+
+- Add the `verifier-eval` video clips to the gate (temporal event-level FP-rate).
+- Wire reviewed FPs into a YOLO hard-negative dataset builder → detector retrain,
+  closing the loop on the real detector (the synthetic loop already does this).

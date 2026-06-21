@@ -58,6 +58,18 @@ yolo:
   run_name: dfire-full
   weights: /data/cpfp-output/yolo_runs/dfire-full/weights/best.pt
 
+gate:
+  # Detection-aware promotion gate on a frozen eval set. Deltas are tolerances:
+  # negative allows a small regression, 0.0 is strict.
+  registry_dir: /data/cpfp-output/detector_registry
+  eval_split: val            # the data_yaml split to evaluate (D-Fire test)
+  conf: 0.25
+  iou: 0.5
+  map50_min_delta: -0.01     # candidate mAP@50 must not drop more than this
+  recall_min_delta: -0.02    # per-class recall floor vs production
+  fp_rate_max_delta: 0.0     # negative-image FP-rate must not increase
+  fp_eval_limit: 1500        # images scanned for the FP-rate metric (speed)
+
 mining:
   # Harvest false positives by running the detector over a split.
   source_images: /data/vrs/D-Fire/test/images

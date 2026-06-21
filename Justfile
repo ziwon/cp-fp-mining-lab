@@ -33,6 +33,11 @@ detect-train:
 mine-fp:
     uv run python scripts/12_mine_false_positives.py
 
+# Detection-aware promotion gate: evaluate a candidate detector on the frozen
+# eval set (mAP, per-class recall, negative-image FP-rate) and gate-promote it.
+eval-gate:
+    uv run python scripts/13_evaluate_and_gate.py
+
 serve-ml:
     uv run python services/ml_backend.py
 
