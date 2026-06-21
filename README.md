@@ -186,6 +186,23 @@ cv-fp-mining-lab/
 For the full local active-learning loop (Label Studio review → webhook retrain →
 gate → W&B), follow [`docs/demo_walkthrough.md`](docs/demo_walkthrough.md).
 
+### Demo screenshots
+
+**Human review in Label Studio.** Uncertainty-ranked false-positive crops loaded as
+tasks, with the synthetic FP image, model metadata (`event_id`, `camera_id`,
+`pred_class`), and the reviewer's verdict. Images are served over HTTP by the
+`fileserver` container so they render directly in the UI.
+
+![Label Studio review queue](docs/assets/labelling-all-tasks.png)
+
+**Model lineage in self-hosted W&B.** Each review batch triggers a `retrain` run;
+the charts compare runs side by side — `macro_f1`/`accuracy` (model quality),
+`promoted` (did it clear the gate), and `n_samples`/`n_eval`/`n_classes` (the
+training/eval split) — so you can see exactly how each batch of human labels moved
+the detector.
+
+![W&B retrain charts](docs/assets/wandb-charts.png)
+
 ### Docker Compose on a GPU server
 
 For a dedicated mining server, build the worker image and start the local services:
