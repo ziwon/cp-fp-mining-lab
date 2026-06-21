@@ -83,6 +83,62 @@ exports can feed `scripts/14_build_hard_negatives.py` directly. Script 14 now pr
 `data/processed/reviewed_fp_samples.csv` when present, falling back to `fp_events.csv`
 for fully headless GT-confirmed runs.
 
+## First LS + W&B workflow smoke test
+
+After the headless real-data pipeline works, run one small Label Studio + W&B pass
+to validate the production workflow wiring. The goal of this pass is **lineage and
+handoff verification**, not model improvement; 30-50 reviewed crops are enough.
+
+1. Start the local review/lineage services:
+
+   ```bash
+   just docker-build
+   docker compose up -d minio labelstudio wandb fileserver
+   ```
+
+   For online W&B logging, create a user/API key in the W&B UI, set
+   `WANDB_MODE=online`, `WANDB_BASE_URL`, and `WANDB_API_KEY`, then recreate the
+   worker shell/service. Without those values the scripts log offline.
+
+2. Mine and rank a small real FP review batch:
+
+   ```bash
+   WANDB_MODE=online just mine-fp
+   uv run python scripts/01_extract_embeddings.py --method clip
+   uv run python scripts/02_cluster_false_positives.py
+   uv run python scripts/03_export_for_label_studio.py --budget 50 --strategy entropy
+   ```
+
+3. In Label Studio:
+
+   - Set the labeling interface from `data/processed/labelstudio_label_config.xml`.
+   - Import `data/processed/labelstudio_tasks.json`.
+   - Review 30-50 tasks, selecting `is_event`, `fp_type`, and `bbox_valid`.
+   - Export the reviewed JSON.
+
+4. Build, retrain, and gate from the reviewed export:
+
+   ```bash
+   uv run python scripts/04_import_label_studio_export.py --input <label-studio-export.json>
+   WANDB_MODE=online just build-hardneg
+   WANDB_MODE=online just retrain-hardneg
+   WANDB_MODE=online uv run python scripts/13_evaluate_and_gate.py \
+     --candidate /data/cpfp-output/yolo_runs/dfire-hardneg/weights/best.pt
+   ```
+
+5. Verify the pass:
+
+   - Label Studio tasks render FP crops and reviewer choices are present in the export.
+   - `data/processed/reviewed_fp_samples.csv` keeps `source_image_path`.
+   - `scripts/14_build_hard_negatives.py` uses the reviewed CSV, not stale headless
+     `fp_events.csv`.
+   - W&B has `mine-fp`, `build-hardneg`, `yolo-retrain`, and `eval-gate` runs with
+     linked artifacts.
+   - The gate either promotes or rejects the candidate with explicit check results.
+
+If this smoke test passes, tune for quality with a larger, more diverse FP batch,
+oversampling, lower fine-tuning LR, and more epochs.
+
 ## How a false positive is defined
 
 A detection is a false positive when it matches **no ground-truth box** — same
