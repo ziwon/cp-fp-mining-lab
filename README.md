@@ -148,6 +148,7 @@ cv-fp-mining-lab/
 ├── docs/
 │   ├── active_learning.md
 │   ├── architecture.md
+│   ├── demo_walkthrough.md
 │   ├── fp_taxonomy.md
 │   ├── hybrid_k8s_architecture.md
 │   └── label_studio_setup.md
@@ -181,6 +182,9 @@ cv-fp-mining-lab/
 ```
 
 ## Quick start
+
+For the full local active-learning loop (Label Studio review → webhook retrain →
+gate → W&B), follow [`docs/demo_walkthrough.md`](docs/demo_walkthrough.md).
 
 ### Docker Compose on a GPU server
 

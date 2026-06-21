@@ -52,7 +52,7 @@ detector:
   #   0.0   strict: candidate must at least match production
   #   >0    require a real improvement of that size
   #   <0    tolerance: accept a candidate within |delta| of production
-  promotion_min_delta: -0.1
+  promotion_min_delta: 0.0
 
 serving:
   # Label Studio ML backend (Phase 2)
@@ -64,7 +64,7 @@ webhook:
   # retrain trigger receiver (Phase 3)
   host: 0.0.0.0
   port: 9091
-  batch_threshold: 3
+  batch_threshold: 10
 
 wandb:
   project: cv-fp-mining-lab
