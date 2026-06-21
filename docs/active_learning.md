@@ -63,6 +63,10 @@ All three components below now run offline in this repo:
 - **Phase 2 (serving)** — `services/ml_backend.py` over `cv_fp_lab/serving.py`.
 - **Phase 3 (retraining)** — `services/webhook.py` over `cv_fp_lab/feedback.py` +
   `cv_fp_lab/training.py`.
+- **Real-data gate logging** — `scripts/13_evaluate_and_gate.py` logs YOLO
+  candidate/production metrics, gate checks, and `.pt` artifacts to W&B
+  (`job_type=eval-gate`) while keeping the local registry as the offline source of
+  truth.
 
 Bootstrap the first model with `scripts/06_train_detector.py`; run the services with
 the `serve` extra (`uv sync --extra serve`). The notes below describe the design and
@@ -168,6 +172,9 @@ pieces for managed ones:
 
 - Replace `LocalModelRegistry` with the W&B Model Registry (Artifacts + aliases).
 - Serve the detector on a GPU node pool; embed via CLIP/DINOv2 instead of `simple`.
+- Promote the D-Fire/YOLO path to the primary loop: mine real FP crops, review them
+  in Label Studio, build hard negatives from the reviewed export, retrain YOLO, and
+  compare gate runs in W&B. The synthetic path should remain as CI/demo coverage.
 - Have the webhook run the dataset builder + schema/bbox validation before retraining,
   and submit retraining as an Argo Workflow / Kubernetes `Job` rather than in-process.
 - Add idempotency by `(event_id, annotation_id)` and a human approval gate on

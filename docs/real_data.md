@@ -61,6 +61,28 @@ uv run python scripts/03_export_for_label_studio.py
 `mine-fp` writes `data/processed/fp_events.csv` (same schema as the synthetic
 generator, plus `source_image_path` and `is_negative_image`) and the FP crops.
 
+For production-shaped active learning, treat the synthetic pipeline as a smoke test
+and run Label Studio/W&B on this real-data track:
+
+```bash
+# Mine + cluster real FP crops.
+just mine-fp
+uv run python scripts/01_extract_embeddings.py --method clip
+uv run python scripts/02_cluster_false_positives.py
+uv run python scripts/03_export_for_label_studio.py --budget 200 --strategy entropy
+
+# Import reviewed real FP crops, then build hard negatives from the reviewed export.
+uv run python scripts/04_import_label_studio_export.py --input <label-studio-export.json>
+just build-hardneg
+just retrain-hardneg
+uv run python scripts/13_evaluate_and_gate.py --candidate /data/cpfp-output/yolo_runs/dfire-hardneg/weights/best.pt
+```
+
+`scripts/03_export_for_label_studio.py` preserves `source_image_path`, so reviewed
+exports can feed `scripts/14_build_hard_negatives.py` directly. Script 14 now prefers
+`data/processed/reviewed_fp_samples.csv` when present, falling back to `fp_events.csv`
+for fully headless GT-confirmed runs.
+
 ## How a false positive is defined
 
 A detection is a false positive when it matches **no ground-truth box** — same
@@ -114,6 +136,12 @@ detector (mAP 0.69, recall 0.75, neg_fp_rate 0.016), so production was protected
 
 Promoted detectors are stored in `gate.registry_dir` (`LocalModelRegistry.register_file`,
 `.pt` artifacts with `candidate/staging/production` aliases).
+
+Gate runs are also logged to W&B (`job_type=eval-gate`) with candidate/production
+metrics, per-check pass/fail detail, the registered YOLO `.pt` artifact, and the
+current hard-negative dataset artifact when present. W&B remains offline by default;
+set `WANDB_MODE=online`, `WANDB_BASE_URL`, and `WANDB_API_KEY` to sync to the local
+or hosted server.
 
 ## Closing the loop — hard-negative retraining
 

@@ -14,14 +14,21 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--events",
-        default=str(Path(cfg["paths"]["processed_dir"]) / "fp_events.csv"),
-        help="mined/reviewed FP events CSV (needs source_image_path)",
+        default=None,
+        help=(
+            "mined/reviewed FP events CSV (needs source_image_path). "
+            "Defaults to reviewed_fp_samples.csv when present, else fp_events.csv."
+        ),
     )
     args = parser.parse_args()
 
+    processed_dir = Path(cfg["paths"]["processed_dir"])
+    reviewed = processed_dir / "reviewed_fp_samples.csv"
+    events = Path(args.events) if args.events else reviewed if reviewed.exists() else processed_dir / "fp_events.csv"
     n_classes = len(cfg["dfire"]["classes"])
-    stats = build_hard_negative_dataset(args.events, hn["output_dir"], n_classes=n_classes)
+    stats = build_hard_negative_dataset(events, hn["output_dir"], n_classes=n_classes)
     print(f"Built hard-negative dataset: {stats['output_dir']}")
+    print(f"  source events: {events}")
     print(f"  images: {stats['n_images']} (negatives: {stats['n_negatives']})")
     print(f"  invalid labels dropped: {stats['n_invalid_labels_dropped']}")
     print("Next: scripts/15_retrain_with_hard_negatives.py")

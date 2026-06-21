@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import os
 from pathlib import Path
+from typing import Any
 
 import pandas as pd
 
@@ -72,6 +74,97 @@ def log_retrain_run(
         artifact.add_file(str(model_path))
         aliases = ["latest", "production"] if result.get("promoted") else ["latest", "candidate"]
         run.log_artifact(artifact, aliases=aliases)
+
+    url = run.get_url()
+    run.finish()
+    return url
+
+
+def _flatten_metrics(prefix: str, metrics: dict[str, Any] | None) -> dict[str, float]:
+    flat: dict[str, float] = {}
+    if not metrics:
+        return flat
+    for key, value in metrics.items():
+        if isinstance(value, dict):
+            for sub_key, sub_value in value.items():
+                if isinstance(sub_value, int | float):
+                    flat[f"{prefix}_{key}_{sub_key}"] = float(sub_value)
+        elif isinstance(value, int | float):
+            flat[f"{prefix}_{key}"] = float(value)
+    return flat
+
+
+def log_detection_gate_run(
+    project: str,
+    result: dict[str, Any],
+    registry_dir: str | Path,
+    hard_negative_dir: str | Path | None = None,
+) -> str | None:
+    """Log a YOLO detection gate decision as a W&B run + model artifact.
+
+    The real-data track stores YOLO checkpoints in ``LocalModelRegistry``. This
+    logger mirrors the synthetic webhook logging for detection metrics: candidate
+    and production eval numbers, per-check pass/fail, the promotion decision, and
+    the registered ``.pt`` model artifact. Returns the run URL, or ``None`` when
+    W&B is unavailable.
+    """
+    try:
+        import wandb
+    except ModuleNotFoundError:
+        return None
+
+    os.environ.setdefault("WANDB_MODE", "offline")
+    run = wandb.init(project=project, job_type="eval-gate", reinit=True)
+    metrics = {
+        **_flatten_metrics("candidate", result.get("candidate_metrics")),
+        **_flatten_metrics("production", result.get("production_metrics")),
+        "promoted": int(bool(result.get("promoted"))),
+    }
+    run.summary.update(metrics)
+    run.summary.update(
+        {
+            "version": result.get("version"),
+            "gate_reason": result.get("reason"),
+            "candidate_weights": result.get("candidate_weights"),
+            "production_weights": result.get("production_weights"),
+        }
+    )
+    run.log(metrics)
+
+    checks = result.get("checks") or {}
+    if checks:
+        table = wandb.Table(
+            columns=["check", "passed", "candidate", "production", "detail"]
+        )
+        for name, check in sorted(checks.items()):
+            table.add_data(
+                name,
+                bool(check.get("passed")),
+                check.get("candidate"),
+                check.get("production"),
+                check.get("detail"),
+            )
+        run.log({"gate_checks": table})
+
+    version = result.get("version")
+    model_path = None
+    if version:
+        model_dir = Path(registry_dir) / "models" / str(version)
+        model_path = model_dir / "model.pt"
+        if not model_path.exists():
+            candidates = sorted(model_dir.glob("*.pt"))
+            model_path = candidates[0] if candidates else None
+    if version and model_path and model_path.exists():
+        artifact = wandb.Artifact(str(version), type="model")
+        artifact.add_file(str(model_path))
+        aliases = ["latest", "production"] if result.get("promoted") else ["latest", "candidate"]
+        run.log_artifact(artifact, aliases=aliases)
+
+    hardneg_path = Path(hard_negative_dir) if hard_negative_dir else None
+    if hardneg_path and hardneg_path.exists():
+        artifact = wandb.Artifact(f"{version or 'candidate'}-hard-negatives", type="dataset")
+        artifact.add_dir(str(hardneg_path))
+        run.log_artifact(artifact, aliases=["latest"])
 
     url = run.get_url()
     run.finish()

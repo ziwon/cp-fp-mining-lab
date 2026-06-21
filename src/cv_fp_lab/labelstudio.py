@@ -94,6 +94,10 @@ def dataframe_to_labelstudio_tasks(
             data["uncertainty"] = round(float(row["uncertainty"]), 4)
         if "acquisition_rank" in row and pd.notna(row["acquisition_rank"]):
             data["acquisition_rank"] = int(row["acquisition_rank"])
+        for optional_key in ("source_image_path", "is_negative_image", "model_version"):
+            if optional_key in row and pd.notna(row[optional_key]):
+                value = row[optional_key]
+                data[optional_key] = bool(value) if optional_key == "is_negative_image" else value
         pred_label = row.get("synthetic_fp_type", row.get("pred_class"))
         result = []
         if pd.notna(pred_label) and str(pred_label) in FP_TYPE_CHOICES:
@@ -136,6 +140,9 @@ def parse_labelstudio_export(path: str | Path) -> pd.DataFrame:
             "pred_class": data.get("pred_class"),
             "pred_confidence": data.get("pred_confidence"),
             "cluster_id": data.get("cluster_id"),
+            "source_image_path": data.get("source_image_path"),
+            "is_negative_image": data.get("is_negative_image"),
+            "model_version": data.get("model_version"),
             "review_is_event": None,
             "review_fp_type": None,
             "review_bbox_valid": None,

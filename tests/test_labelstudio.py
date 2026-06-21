@@ -18,6 +18,8 @@ def test_labelstudio_task_export_and_review_parse(tmp_path) -> None:
                 "pred_confidence": 0.9,
                 "cluster_id": 3,
                 "synthetic_fp_type": "steam",
+                "source_image_path": "/data/D-Fire/train/images/frame.jpg",
+                "is_negative_image": True,
                 "model_version": "detector-test",
             }
         ]
@@ -27,6 +29,7 @@ def test_labelstudio_task_export_and_review_parse(tmp_path) -> None:
 
     assert tasks_path.exists()
     assert tasks[0]["data"]["cluster_id"] == 3
+    assert tasks[0]["data"]["source_image_path"] == "/data/D-Fire/train/images/frame.jpg"
     assert tasks[0]["predictions"][0]["model_version"] == "detector-test"
     assert tasks[0]["predictions"][0]["result"][0]["value"]["choices"] == ["steam"]
 
@@ -46,6 +49,8 @@ def test_labelstudio_task_export_and_review_parse(tmp_path) -> None:
     reviewed = parse_labelstudio_export(export_path)
 
     assert reviewed.loc[0, "event_id"] == "evt_1"
+    assert reviewed.loc[0, "source_image_path"] == "/data/D-Fire/train/images/frame.jpg"
+    assert bool(reviewed.loc[0, "is_negative_image"]) is True
     assert reviewed.loc[0, "review_is_event"] == "false_positive"
     assert reviewed.loc[0, "review_fp_type"] == "steam"
     assert reviewed.loc[0, "review_bbox_valid"] == "wrong_class"

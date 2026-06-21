@@ -9,6 +9,7 @@ from cv_fp_lab.config import load_config
 from cv_fp_lab.detection_eval import detection_metrics, false_positive_rate
 from cv_fp_lab.gating import evaluate_promotion
 from cv_fp_lab.registry import LocalModelRegistry
+from cv_fp_lab.wandb_logging import log_detection_gate_run
 from cv_fp_lab.yolo_detector import YoloDetector
 
 
@@ -65,14 +66,40 @@ def main() -> None:
     print(f"  -> promoted={decision['promoted']} ({decision['reason']})")
 
     version = f"detector-{dt.datetime.now(dt.timezone.utc).strftime('%Y%m%d-%H%M%S')}"
-    registry.register_file(version, candidate_weights, metrics=cand, stage="candidate",
-                           extra_meta={"gate": decision["reason"]})
+    registry.register_file(
+        version,
+        candidate_weights,
+        metrics=cand,
+        stage="candidate",
+        extra_meta={"gate": decision["reason"]},
+    )
     if decision["promoted"]:
         registry.promote(version, "staging")
         registry.promote(version, "production")
         print(f"\nPromoted {version} -> production")
     else:
         print(f"\nRegistered {version} as candidate (gate not cleared; production unchanged)")
+
+    try:
+        wandb_url = log_detection_gate_run(
+            project=cfg["wandb"]["project"],
+            result={
+                "version": version,
+                "promoted": decision["promoted"],
+                "reason": decision["reason"],
+                "checks": decision["checks"],
+                "candidate_metrics": cand,
+                "production_metrics": prod,
+                "candidate_weights": str(candidate_weights),
+                "production_weights": str(prod_weights) if prod_weights else None,
+            },
+            registry_dir=g["registry_dir"],
+            hard_negative_dir=cfg.get("hard_negatives", {}).get("output_dir"),
+        )
+        if wandb_url:
+            print(f"W&B gate run: {wandb_url}")
+    except Exception as exc:
+        print(f"W&B logging skipped: {exc}")
 
 
 if __name__ == "__main__":
