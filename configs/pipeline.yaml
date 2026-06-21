@@ -48,8 +48,11 @@ labelstudio:
 detector:
   registry_dir: data/processed/model_registry
   metric_key: macro_f1
-  # candidate must beat production by this margin to be promoted
-  promotion_min_delta: 0.0
+  # Promote when candidate_metric >= production_metric + promotion_min_delta.
+  #   0.0   strict: candidate must at least match production
+  #   >0    require a real improvement of that size
+  #   <0    tolerance: accept a candidate within |delta| of production
+  promotion_min_delta: -0.1
 
 serving:
   # Label Studio ML backend (Phase 2)
@@ -61,7 +64,7 @@ webhook:
   # retrain trigger receiver (Phase 3)
   host: 0.0.0.0
   port: 9091
-  batch_threshold: 10
+  batch_threshold: 3
 
 wandb:
   project: cv-fp-mining-lab

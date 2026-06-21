@@ -33,11 +33,18 @@ def log_table_and_artifact(project: str, artifact_name: str, processed_dir: str 
     run.finish()
 
 
-def log_retrain_run(project: str, result: dict, registry_dir: str | Path) -> str | None:
+def log_retrain_run(
+    project: str,
+    result: dict,
+    registry_dir: str | Path,
+    reviews: dict[str, str | None] | None = None,
+) -> str | None:
     """Log a webhook-triggered retrain as a W&B run with metrics + model artifact.
 
-    Returns the run URL, or None if wandb is unavailable. Honors WANDB_MODE, so it
-    is a no-op-to-disk in offline mode and syncs to the server when online.
+    When ``reviews`` (the {event_id: label} batch that triggered the retrain) is
+    given, also logs it as a W&B Table so the run shows exactly which human labels
+    drove this model. Returns the run URL, or None if wandb is unavailable. Honors
+    WANDB_MODE, so it is a no-op-to-disk offline and syncs to the server online.
     """
     try:
         import wandb
@@ -51,6 +58,12 @@ def log_retrain_run(project: str, result: dict, registry_dir: str | Path) -> str
         metrics[result.get("metric_key", "macro_f1")] = result["candidate_metric"]
     run.summary.update(metrics)
     run.log(metrics)
+
+    if reviews:
+        table = wandb.Table(columns=["event_id", "review_fp_type"])
+        for event_id, label in sorted(reviews.items()):
+            table.add_data(event_id, label)
+        run.log({"review_batch": table})
 
     version = result.get("version")
     model_path = Path(registry_dir) / "models" / str(version) / "model.joblib"

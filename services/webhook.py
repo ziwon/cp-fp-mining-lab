@@ -67,6 +67,7 @@ def create_app() -> Flask:
                     project=cfg["wandb"]["project"],
                     result=result,
                     registry_dir=dcfg["registry_dir"],
+                    reviews=reviews,
                 )
             except Exception as exc:  # keep the loop alive if W&B is down
                 result["wandb_error"] = str(exc)
