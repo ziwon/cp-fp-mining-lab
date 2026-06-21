@@ -58,6 +58,17 @@ yolo:
   run_name: dfire-full
   weights: /data/cpfp-output/yolo_runs/dfire-full/weights/best.pt
 
+hard_negatives:
+  # Close the loop: reviewed/confirmed FPs -> hard-negative dataset -> retrain.
+  # Mine the FP pool from data NOT in the eval split (train or external) to avoid
+  # leakage, since the gate evaluates on D-Fire test.
+  output_dir: /data/cpfp-output/hard_negatives
+  base_train_dir: /data/vrs/D-Fire/train
+  combined_yaml: data/processed/dfire_hardneg.yaml
+  retrain_epochs: 10
+  retrain_run: dfire-hardneg
+  candidate_weights: /data/cpfp-output/yolo_runs/dfire-hardneg/weights/best.pt
+
 gate:
   # Detection-aware promotion gate on a frozen eval set. Deltas are tolerances:
   # negative allows a small regression, 0.0 is strict.

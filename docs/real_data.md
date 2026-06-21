@@ -115,8 +115,34 @@ detector (mAP 0.69, recall 0.75, neg_fp_rate 0.016), so production was protected
 Promoted detectors are stored in `gate.registry_dir` (`LocalModelRegistry.register_file`,
 `.pt` artifacts with `candidate/staging/production` aliases).
 
+## Closing the loop — hard-negative retraining
+
+The real detector loop is closed end-to-end:
+
+```bash
+just mine-fp        # (12) confirmed FPs from a non-eval pool (train/external)
+just build-hardneg  # (14) FP source frames -> validated YOLO hard-negative dataset
+just retrain-hardneg# (15) fine-tune production on [base train + hard negatives]
+just eval-gate -- --candidate <new best.pt>   # (13) gate decides promotion
+```
+
+`dataset_builder.build_hard_negative_dataset` copies each confirmed FP's source
+frame with its **validated** ground-truth label (empty for background images), so
+the detector relearns the correct content of FP-prone frames. Invalid/out-of-bounds
+labels are dropped (the dataset-validation guard).
+
+**Honest result on this run:** mining 58 hard negatives from D-Fire train and
+fine-tuning 3 epochs *did not* improve the detector — neg-FP-rate rose
+(0.016 → 0.024) and mAP/recall dipped, so the gate **rejected** the candidate and
+kept production. That is the loop working: a naive retrain (too few hard negatives,
+full-schedule LR restart over a converged model) is exactly what the gate exists to
+stop. Making it actually improve needs many more hard negatives (or heavy
+oversampling), a low fine-tuning LR, and more epochs — a tuning exercise on top of
+the now-working mechanism.
+
 ## Remaining
 
 - Add the `verifier-eval` video clips to the gate (temporal event-level FP-rate).
-- Wire reviewed FPs into a YOLO hard-negative dataset builder → detector retrain,
-  closing the loop on the real detector (the synthetic loop already does this).
+- Tune the hard-negative retrain (LR/volume/oversampling) so candidates clear the
+  gate; optionally drive FP confirmation through Label Studio review instead of
+  using ground-truth-confirmed FPs.

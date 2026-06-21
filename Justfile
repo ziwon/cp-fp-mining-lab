@@ -38,6 +38,13 @@ mine-fp:
 eval-gate:
     uv run python scripts/13_evaluate_and_gate.py
 
+# Close the loop: confirmed FPs -> hard-negative dataset -> fine-tune the detector.
+build-hardneg:
+    uv run python scripts/14_build_hard_negatives.py
+
+retrain-hardneg:
+    uv run python scripts/15_retrain_with_hard_negatives.py
+
 serve-ml:
     uv run python services/ml_backend.py
 
