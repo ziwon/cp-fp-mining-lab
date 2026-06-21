@@ -3,6 +3,17 @@ import json
 import pandas as pd
 
 from cv_fp_lab.labelstudio import dataframe_to_labelstudio_tasks, parse_labelstudio_export
+from cv_fp_lab.labelstudio import _to_local_files_url
+
+
+def test_http_image_url_join_handles_absolute_paths() -> None:
+    url = _to_local_files_url(
+        "/data/cpfp-output/fp_crops/a.png",
+        "http://localhost:18090/",
+        "data/",
+    )
+
+    assert url == "http://localhost:18090/data/cpfp-output/fp_crops/a.png"
 
 
 def test_labelstudio_task_export_and_review_parse(tmp_path) -> None:

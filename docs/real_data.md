@@ -97,6 +97,10 @@ handoff verification**, not model improvement; 30-50 reviewed crops are enough.
    docker compose up -d minio labelstudio wandb fileserver
    ```
 
+   The fileserver serves both repo-local `./data` outputs and heavy real-data
+   artifacts under `/data/cpfp-output`, so Label Studio task images can render FP
+   crops mined by `scripts/12_mine_false_positives.py`.
+
    For online W&B logging, create a user/API key in the W&B UI, set
    `WANDB_MODE=online`, `WANDB_BASE_URL`, and `WANDB_API_KEY`, then recreate the
    worker shell/service. Without those values the scripts log offline.

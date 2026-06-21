@@ -59,6 +59,8 @@ def _to_local_files_url(image_path: str, url_prefix: str, strip: str) -> str:
     ``url_prefix`` (e.g. ``/data/local-files/?d=``).
     """
     rel = image_path[len(strip):] if strip and image_path.startswith(strip) else image_path
+    if url_prefix.endswith("/") and rel.startswith("/"):
+        rel = rel.lstrip("/")
     return f"{url_prefix}{rel}"
 
 
