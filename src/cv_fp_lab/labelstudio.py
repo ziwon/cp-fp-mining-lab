@@ -11,11 +11,13 @@ LABEL_CONFIG = """
 <View>
   <Image name="image" value="$image"/>
   <Header value="Model prediction: $pred_class / confidence: $pred_confidence"/>
+  <Header value="Event verdict: choose real_event for true fire/smoke, false_positive for non-events, uncertain when the crop is not enough."/>
   <Choices name="is_event" toName="image" choice="single" required="true">
     <Choice value="real_event"/>
     <Choice value="false_positive"/>
     <Choice value="uncertain"/>
   </Choices>
+  <Header value="False-positive root cause: fill this only when is_event is false_positive. Leave blank for true fire/smoke."/>
   <Choices name="fp_type" toName="image" choice="single">
     <Choice value="steam"/>
     <Choice value="fog"/>
@@ -28,6 +30,7 @@ LABEL_CONFIG = """
     <Choice value="authorized_worker"/>
     <Choice value="unknown"/>
   </Choices>
+  <Header value="Box verdict: valid means the detection box is useful; unnecessary means it should not have fired."/>
   <Choices name="bbox_valid" toName="image" choice="single">
     <Choice value="valid"/>
     <Choice value="wrong_class"/>
