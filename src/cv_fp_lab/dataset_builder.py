@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import shutil
 from pathlib import Path
 from typing import Any
@@ -18,6 +19,16 @@ def _label_path_for(image_path: str | Path) -> Path:
             parts[i] = "labels"
             break
     return Path(*parts).with_suffix(".txt")
+
+
+def _unique_stem(src: Path, used_stems: set[str]) -> str:
+    if src.stem not in used_stems:
+        used_stems.add(src.stem)
+        return src.stem
+    digest = hashlib.sha1(str(src.resolve()).encode("utf-8")).hexdigest()[:8]
+    stem = f"{src.stem}_{digest}"
+    used_stems.add(stem)
+    return stem
 
 
 def validate_label_lines(label_path: str | Path, n_classes: int) -> tuple[list[str], int]:
@@ -89,12 +100,14 @@ def build_hard_negative_dataset(
     n_images = 0
     n_negatives = 0
     n_invalid_dropped = 0
+    used_stems: set[str] = set()
     for src in sorted({s for s in df["source_image_path"].dropna() if Path(s).exists()}):
         src = Path(src)
-        shutil.copy2(src, img_dir / src.name)
+        out_stem = _unique_stem(src, used_stems)
+        shutil.copy2(src, img_dir / f"{out_stem}{src.suffix}")
         valid_lines, invalid = validate_label_lines(_label_path_for(src), n_classes)
         n_invalid_dropped += invalid
-        (lbl_dir / f"{src.stem}.txt").write_text("\n".join(valid_lines), encoding="utf-8")
+        (lbl_dir / f"{out_stem}.txt").write_text("\n".join(valid_lines), encoding="utf-8")
         n_images += 1
         if not valid_lines:
             n_negatives += 1

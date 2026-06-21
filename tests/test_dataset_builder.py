@@ -70,3 +70,29 @@ def test_build_filters_unconfirmed(tmp_path) -> None:
     )
     stats = build_hard_negative_dataset(events, tmp_path / "out", n_classes=2)
     assert stats["n_images"] == 0  # not a confirmed FP
+
+
+def test_build_disambiguates_colliding_source_names(tmp_path) -> None:
+    for split, label in (("a", "0 0.5 0.5 0.3 0.3\n"), ("b", "1 0.5 0.5 0.2 0.2\n")):
+        root = tmp_path / split
+        (root / "images").mkdir(parents=True)
+        (root / "labels").mkdir(parents=True)
+        Image.new("RGB", (64, 64)).save(root / "images" / "same.jpg")
+        (root / "labels" / "same.txt").write_text(label)
+
+    events = pd.DataFrame(
+        {
+            "source_image_path": [
+                str(tmp_path / "a" / "images" / "same.jpg"),
+                str(tmp_path / "b" / "images" / "same.jpg"),
+            ],
+            "operator_feedback": ["false_positive", "false_positive"],
+        }
+    )
+
+    out = tmp_path / "out"
+    stats = build_hard_negative_dataset(events, out, n_classes=2)
+
+    assert stats["n_images"] == 2
+    assert len(list((out / "images").glob("same*.jpg"))) == 2
+    assert len(list((out / "labels").glob("same*.txt"))) == 2
