@@ -13,7 +13,7 @@ This is steps 1–2 of the production-hardening plan in
 ## Install
 
 ```bash
-uv sync --extra detect          # adds ultralytics (pulls torch)
+just setup-real                 # uv sync --extra detect --extra clip
 ```
 
 CPU works for small subsets. For GPU, set `yolo.device: 0` (and
@@ -89,9 +89,10 @@ After the headless real-data pipeline works, run one small Label Studio + W&B pa
 to validate the production workflow wiring. The goal of this pass is **lineage and
 handoff verification**, not model improvement; 30-50 reviewed crops are enough.
 
-1. Start the local review/lineage services:
+1. Install the real-data extras and start the local review/lineage services:
 
    ```bash
+   just setup-real
    just docker-build
    docker compose up -d minio labelstudio wandb fileserver
    ```

@@ -6,6 +6,9 @@ default:
 setup:
     uv sync
 
+setup-real:
+    uv sync --extra detect --extra clip
+
 demo:
     uv run python scripts/00_generate_sample_data.py
     uv run python scripts/01_extract_embeddings.py --method simple

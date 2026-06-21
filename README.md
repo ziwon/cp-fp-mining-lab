@@ -266,7 +266,7 @@ cluster/rank FP crops, review them in Label Studio, build hard negatives, retrai
 YOLO, then compare and promote through the W&B-logged gate.
 
 ```bash
-uv sync --extra detect --extra clip
+just setup-real
 just detect-prepare
 just detect-train
 just mine-fp
