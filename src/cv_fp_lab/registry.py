@@ -61,6 +61,48 @@ class LocalModelRegistry:
         (vdir / "meta.json").write_text(json.dumps(meta, indent=2), encoding="utf-8")
         return version
 
+    def register_file(
+        self,
+        version: str,
+        weights_path: str | Path,
+        metrics: dict[str, Any],
+        stage: str = "candidate",
+        filename: str = "model.pt",
+        extra_meta: dict[str, Any] | None = None,
+    ) -> str:
+        """Register an arbitrary model weight file (e.g. a YOLO ``.pt``).
+
+        Parallel to ``register`` (which stores a joblib ``FpDetector``); used for
+        the detection track where the artifact is a checkpoint file, not a
+        pickled estimator.
+        """
+        import shutil
+
+        if stage not in STAGES:
+            raise ValueError(f"Unknown stage {stage!r}; choose from {STAGES}.")
+        vdir = self.models_dir / version
+        vdir.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(str(weights_path), str(vdir / filename))
+        meta = {
+            "version": version,
+            "stage": stage,
+            "metrics": metrics,
+            "weights_file": filename,
+            **(extra_meta or {}),
+        }
+        (vdir / "meta.json").write_text(json.dumps(meta, indent=2), encoding="utf-8")
+        return version
+
+    def weights_path(self, alias_or_version: str = "production") -> Path | None:
+        """Path to a registered weight file by alias or version, or None."""
+        version = self.stage_version(alias_or_version) or alias_or_version
+        meta_path = self.models_dir / version / "meta.json"
+        if not meta_path.exists():
+            return None
+        filename = json.loads(meta_path.read_text(encoding="utf-8")).get("weights_file", "model.pt")
+        path = self.models_dir / version / filename
+        return path if path.exists() else None
+
     def meta(self, version: str) -> dict[str, Any]:
         return json.loads((self.models_dir / version / "meta.json").read_text(encoding="utf-8"))
 
