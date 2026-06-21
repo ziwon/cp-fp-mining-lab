@@ -81,6 +81,18 @@ Scale-out boundaries:
 - **Review loop**: keep Label Studio asynchronous; mining can export tasks and continue while reviewers work.
 - **Lineage**: publish every curated dataset as a W&B Artifact with source query, model version, config hash, and review export version.
 
+Production workflow boundaries:
+
+| Stage | Local entrypoint | Kubernetes / workflow shape | Main artifacts |
+| --- | --- | --- | --- |
+| Mine detector errors | `scripts/12_mine_false_positives.py` | GPU/CPU `Job` sharded by site/date/model | `fp_events.csv`, FP crops, W&B `mine-fp` run |
+| Embed FP crops | `scripts/01_extract_embeddings.py --method clip` | GPU `Job` or batch worker | `embeddings.npy` |
+| Cluster and rank | `scripts/02_cluster_false_positives.py`, `scripts/03_export_for_label_studio.py` | CPU `Job` | `fp_clusters.csv`, `labelstudio_tasks.json` |
+| Human review | Label Studio | `Deployment` + managed DB/object storage | reviewed export |
+| Build hard negatives | `scripts/14_build_hard_negatives.py` | CPU `Job` after review export | YOLO hard-negative dataset, W&B `build-hardneg` run |
+| Fine-tune detector | `scripts/15_retrain_with_hard_negatives.py` | GPU training `Job` | candidate `.pt`, W&B `yolo-retrain` run |
+| Evaluate and gate | `scripts/13_evaluate_and_gate.py` | CPU/GPU eval `Job` with protected eval data | gate decision, registry alias, W&B `eval-gate` run |
+
 Recommended production progression:
 
 1. **Single GPU server**: Docker Compose, host-mounted data, MinIO, Label Studio, offline/online W&B.

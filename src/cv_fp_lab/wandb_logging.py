@@ -94,6 +94,166 @@ def _flatten_metrics(prefix: str, metrics: dict[str, Any] | None) -> dict[str, f
     return flat
 
 
+def _summarize_fp_events(events_csv: str | Path) -> dict[str, float]:
+    path = Path(events_csv)
+    if not path.exists():
+        return {"n_fp_events": 0.0, "n_negative_image_fps": 0.0}
+    df = pd.read_csv(path)
+    summary = {"n_fp_events": float(len(df))}
+    if "is_negative_image" in df.columns:
+        summary["n_negative_image_fps"] = float(df["is_negative_image"].fillna(False).sum())
+    if "pred_class" in df.columns:
+        for cls, count in df["pred_class"].fillna("unknown").value_counts().items():
+            summary[f"n_pred_class_{cls}"] = float(count)
+    return summary
+
+
+def _count_yolo_dataset(dataset_dir: str | Path) -> dict[str, float]:
+    root = Path(dataset_dir)
+    image_dir = root / "images"
+    label_dir = root / "labels"
+    images = []
+    if image_dir.exists():
+        images = [
+            p for p in image_dir.iterdir()
+            if p.suffix.lower() in {".jpg", ".jpeg", ".png"}
+        ]
+    labels = list(label_dir.glob("*.txt")) if label_dir.exists() else []
+    empty_labels = 0
+    for label in labels:
+        if not label.read_text(encoding="utf-8").strip():
+            empty_labels += 1
+    return {
+        "n_images": float(len(images)),
+        "n_label_files": float(len(labels)),
+        "n_empty_labels": float(empty_labels),
+    }
+
+
+def log_mining_run(
+    project: str,
+    events_csv: str | Path,
+    crops_dir: str | Path,
+    weights: str | Path,
+    source_images: str | Path,
+    source_labels: str | Path,
+    conf: float,
+    iou_thr: float,
+    limit: int | None = None,
+) -> str | None:
+    """Log mined real false positives and crop artifacts for the YOLO track."""
+    try:
+        import wandb
+    except ModuleNotFoundError:
+        return None
+
+    os.environ.setdefault("WANDB_MODE", "offline")
+    run = wandb.init(project=project, job_type="mine-fp", reinit=True)
+    metrics = _summarize_fp_events(events_csv)
+    run.summary.update(metrics)
+    run.summary.update(
+        {
+            "weights": str(weights),
+            "source_images": str(source_images),
+            "source_labels": str(source_labels),
+            "conf": conf,
+            "iou_thr": iou_thr,
+            "limit": limit,
+        }
+    )
+    run.log(metrics)
+
+    events_path = Path(events_csv)
+    if events_path.exists():
+        df = pd.read_csv(events_path)
+        run.log({"fp_events": wandb.Table(dataframe=df.head(2000))})
+        artifact = wandb.Artifact("mined-fp-events", type="dataset")
+        artifact.add_file(str(events_path))
+        crops_path = Path(crops_dir)
+        if crops_path.exists():
+            artifact.add_dir(str(crops_path), name="crops")
+        run.log_artifact(artifact, aliases=["latest"])
+
+    url = run.get_url()
+    run.finish()
+    return url
+
+
+def log_hard_negative_dataset_run(
+    project: str,
+    events_csv: str | Path,
+    hard_negative_dir: str | Path,
+    stats: dict[str, Any],
+) -> str | None:
+    """Log a reviewed/confirmed FP to YOLO hard-negative dataset build."""
+    try:
+        import wandb
+    except ModuleNotFoundError:
+        return None
+
+    os.environ.setdefault("WANDB_MODE", "offline")
+    run = wandb.init(project=project, job_type="build-hardneg", reinit=True)
+    metrics = {k: float(v) for k, v in stats.items() if isinstance(v, int | float)}
+    metrics.update(_count_yolo_dataset(hard_negative_dir))
+    run.summary.update(metrics)
+    run.summary.update({"events_csv": str(events_csv), "hard_negative_dir": str(hard_negative_dir)})
+    run.log(metrics)
+
+    artifact = wandb.Artifact("hard-negative-dataset", type="dataset")
+    events_path = Path(events_csv)
+    if events_path.exists():
+        artifact.add_file(str(events_path))
+    hardneg_path = Path(hard_negative_dir)
+    if hardneg_path.exists():
+        artifact.add_dir(str(hardneg_path), name="yolo")
+    run.log_artifact(artifact, aliases=["latest"])
+
+    url = run.get_url()
+    run.finish()
+    return url
+
+
+def log_yolo_retrain_run(
+    project: str,
+    candidate_weights: str | Path | None,
+    combined_yaml: str | Path,
+    base_weights: str | Path,
+    hard_negative_dir: str | Path,
+    epochs: int,
+    device: str | int,
+) -> str | None:
+    """Log a YOLO hard-negative fine-tuning run before eval-gate promotion."""
+    try:
+        import wandb
+    except ModuleNotFoundError:
+        return None
+
+    os.environ.setdefault("WANDB_MODE", "offline")
+    run = wandb.init(project=project, job_type="yolo-retrain", reinit=True)
+    metrics = _count_yolo_dataset(hard_negative_dir)
+    run.summary.update(metrics)
+    run.summary.update(
+        {
+            "candidate_weights": str(candidate_weights) if candidate_weights else None,
+            "combined_yaml": str(combined_yaml),
+            "base_weights": str(base_weights),
+            "hard_negative_dir": str(hard_negative_dir),
+            "epochs": epochs,
+            "device": str(device),
+        }
+    )
+    run.log(metrics)
+
+    if candidate_weights and Path(candidate_weights).exists():
+        artifact = wandb.Artifact(Path(candidate_weights).stem, type="model")
+        artifact.add_file(str(candidate_weights))
+        run.log_artifact(artifact, aliases=["latest", "candidate"])
+
+    url = run.get_url()
+    run.finish()
+    return url
+
+
 def log_detection_gate_run(
     project: str,
     result: dict[str, Any],

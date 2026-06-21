@@ -53,7 +53,15 @@ flowchart LR
 
 ## Implementation status
 
-All three components below now run offline in this repo:
+The repo now has two intentional tracks:
+
+- **Synthetic smoke-test track** — scripts 00-06, the sklearn `FpDetector`, and the
+  Flask ML-backend/webhook demo. This keeps CI and local demos cheap.
+- **Primary real-data track** — scripts 10-15, the YOLO `.pt` detector, real FP crop
+  mining, Label Studio hard-negative curation, W&B lineage runs, and the
+  detection-aware gate.
+
+Implemented pieces:
 
 - **Detector** — `cv_fp_lab/detector.py` (`FpDetector`): a `fp_type` classifier over
   embeddings, with hold-out metrics, confidence, and normalized-entropy uncertainty.
@@ -67,6 +75,9 @@ All three components below now run offline in this repo:
   candidate/production metrics, gate checks, and `.pt` artifacts to W&B
   (`job_type=eval-gate`) while keeping the local registry as the offline source of
   truth.
+- **Real-data lineage hooks** — scripts 12, 14, and 15 log `mine-fp`,
+  `build-hardneg`, and `yolo-retrain` runs/artifacts to W&B without making W&B a
+  hard dependency.
 
 Bootstrap the first model with `scripts/06_train_detector.py`; run the services with
 the `serve` extra (`uv sync --extra serve`). The notes below describe the design and

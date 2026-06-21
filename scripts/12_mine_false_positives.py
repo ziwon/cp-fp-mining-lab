@@ -7,6 +7,7 @@ sys.path.append(str(Path(__file__).resolve().parents[1] / "src"))
 from cv_fp_lab.config import load_config
 from cv_fp_lab.fp_mining import collect_false_positives
 from cv_fp_lab.utils import ensure_dir
+from cv_fp_lab.wandb_logging import log_mining_run
 from cv_fp_lab.yolo_detector import YoloDetector
 
 
@@ -47,6 +48,22 @@ def main() -> None:
         print(f"  from negative images: {n_neg} | from mislocalized/misclassified: {len(df) - n_neg}")
         print(f"  by predicted class:\n{df['pred_class'].value_counts().to_string()}")
     print(f"  crops: {cfg['mining']['crops_dir']}")
+    try:
+        wandb_url = log_mining_run(
+            project=cfg["wandb"]["project"],
+            events_csv=out,
+            crops_dir=m["crops_dir"],
+            weights=weights,
+            source_images=args.images,
+            source_labels=args.labels,
+            conf=args.conf,
+            iou_thr=args.iou,
+            limit=args.limit,
+        )
+        if wandb_url:
+            print(f"W&B mining run: {wandb_url}")
+    except Exception as exc:
+        print(f"W&B logging skipped: {exc}")
     print("Next: scripts/01_extract_embeddings.py -> 02_cluster -> 03_export_for_label_studio")
 
 

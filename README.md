@@ -259,6 +259,36 @@ uv sync
 
 This creates `.venv/` and installs the locked runtime dependencies from `pyproject.toml` and `uv.lock`.
 
+### Primary real-data loop
+
+The production-shaped path is the D-Fire/YOLO loop: mine real detector errors,
+cluster/rank FP crops, review them in Label Studio, build hard negatives, retrain
+YOLO, then compare and promote through the W&B-logged gate.
+
+```bash
+uv sync --extra detect --extra clip
+just detect-prepare
+just detect-train
+just mine-fp
+uv run python scripts/01_extract_embeddings.py --method clip
+uv run python scripts/02_cluster_false_positives.py
+uv run python scripts/03_export_for_label_studio.py --budget 200 --strategy entropy
+# import the reviewed Label Studio export, then:
+just build-hardneg
+just retrain-hardneg
+uv run python scripts/13_evaluate_and_gate.py --candidate /data/cpfp-output/yolo_runs/dfire-hardneg/weights/best.pt
+```
+
+W&B runs are emitted for `mine-fp`, `build-hardneg`, `yolo-retrain`, and
+`eval-gate`. They default to offline mode and sync when `WANDB_MODE=online` is
+configured. See [`docs/real_data.md`](docs/real_data.md).
+
+### Synthetic smoke-test loop
+
+The synthetic path below is kept as a fast CI/demo loop. It validates the file
+contracts, Label Studio import/export shape, and local sklearn `FpDetector`
+serving loop without requiring real footage, GPU, or external accounts.
+
 ### 2. Generate synthetic false-positive samples
 
 ```bash
@@ -418,19 +448,18 @@ See [`docs/label_studio_setup.md`](docs/label_studio_setup.md).
 
 W&B is used as the lineage and analysis layer:
 
-- **Artifacts**: dataset versions such as `raw-fp-events:v1`, `hard-negative-smoke:v3`
+- **Artifacts**: mined FP crops, reviewed exports, hard-negative datasets, YOLO `.pt` candidates
 - **Tables**: images, metadata, cluster IDs, human labels, model version
-- **Runs**: training/evaluation metrics
-- **Registry**: candidate/staging/production model lifecycle
+- **Runs**: `mine-fp`, `build-hardneg`, `yolo-retrain`, `eval-gate`, plus synthetic retrain demos
+- **Registry**: local `LocalModelRegistry` now; W&B Registry or equivalent aliases in production
 
 ## Suggested next steps
 
-- Replace synthetic samples with real CCTV false-positive frames.
 - Add production event metadata from PostgreSQL or Kafka.
-- Use CLIP or DINOv2 embeddings instead of simple features.
+- Replace D-Fire paths with production CCTV/object-storage paths.
+- Use DINOv2 embeddings as a stronger alternative to CLIP for FP crop grouping.
 - Add FiftyOne for visual error analysis.
-- Add YOLO/RT-DETR training job and regression evaluation.
-- Connect Label Studio webhooks to trigger dataset rebuilds.
+- Promote the script chain to Argo/Airflow/Kubernetes Jobs with the same inputs/outputs.
 
 ## References to study
 

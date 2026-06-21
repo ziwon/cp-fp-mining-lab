@@ -5,6 +5,7 @@ import sys
 sys.path.append(str(Path(__file__).resolve().parents[1] / "src"))
 
 from cv_fp_lab.config import load_config
+from cv_fp_lab.wandb_logging import log_yolo_retrain_run
 from cv_fp_lab.yolo_detector import YoloDetector, write_dataset_yaml
 
 
@@ -54,6 +55,20 @@ def main() -> None:
         name=hn["retrain_run"],
     )
     print(f"Retrained candidate: {detector.weights_path}")
+    try:
+        wandb_url = log_yolo_retrain_run(
+            project=cfg["wandb"]["project"],
+            candidate_weights=detector.weights_path,
+            combined_yaml=combined_yaml,
+            base_weights=base,
+            hard_negative_dir=hardneg_dir,
+            epochs=args.epochs,
+            device=args.device,
+        )
+        if wandb_url:
+            print(f"W&B retrain run: {wandb_url}")
+    except Exception as exc:
+        print(f"W&B logging skipped: {exc}")
     print("Next: scripts/13_evaluate_and_gate.py --candidate "
           f"{detector.weights_path} (gate decides promotion)")
 

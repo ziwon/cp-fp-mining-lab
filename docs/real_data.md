@@ -143,6 +143,16 @@ current hard-negative dataset artifact when present. W&B remains offline by defa
 set `WANDB_MODE=online`, `WANDB_BASE_URL`, and `WANDB_API_KEY` to sync to the local
 or hosted server.
 
+The upstream real-data stages also emit W&B lineage:
+
+- `mine-fp`: `fp_events.csv`, FP crop artifact, mining source paths, threshold config.
+- `build-hardneg`: reviewed/confirmed source CSV, YOLO hard-negative dataset artifact,
+  image/label counts, empty-label count.
+- `yolo-retrain`: warm-start weights, combined dataset YAML, hard-negative counts,
+  candidate `.pt` artifact.
+- `eval-gate`: candidate vs production metrics, gate checks, promotion decision,
+  registered model artifact.
+
 ## Closing the loop — hard-negative retraining
 
 The real detector loop is closed end-to-end:
@@ -172,5 +182,6 @@ the now-working mechanism.
 
 - Add the `verifier-eval` video clips to the gate (temporal event-level FP-rate).
 - Tune the hard-negative retrain (LR/volume/oversampling) so candidates clear the
-  gate; optionally drive FP confirmation through Label Studio review instead of
-  using ground-truth-confirmed FPs.
+  gate.
+- Replace the local registry with W&B Registry aliases or another production model
+  registry while keeping the same `candidate → staging → production` gate contract.
