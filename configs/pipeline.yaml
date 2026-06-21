@@ -33,6 +33,36 @@ active_learning:
   strategy: entropy  # least_confidence | margin | entropy
   diversity: true    # round-robin across clusters so one cluster cannot dominate
 
+dfire:
+  # Real fire/smoke object-detection data (YOLO format). Override to the full set.
+  root: /data/vrs/dfire-300-stratified
+  train_dir: /data/vrs/dfire-300-stratified
+  val_dir: /data/vrs/D-Fire/test
+  data_yaml: data/processed/dfire.yaml
+  classes:
+    0: smoke
+    1: fire
+
+yolo:
+  # Heavy artifacts live on /data (the workspace disk is small on this host).
+  base_weights: /data/cpfp-output/yolov8n.pt
+  epochs: 30
+  imgsz: 640
+  batch: 16
+  device: cpu        # set to 0 for the first CUDA GPU (needs CUDA-enabled torch)
+  runs_dir: /data/cpfp-output/yolo_runs
+  run_name: dfire
+  weights: /data/cpfp-output/yolo_runs/dfire/weights/best.pt
+
+mining:
+  # Harvest false positives by running the detector over a split.
+  source_images: /data/vrs/D-Fire/test/images
+  source_labels: /data/vrs/D-Fire/test/labels
+  crops_dir: /data/cpfp-output/fp_crops
+  conf: 0.25         # detection confidence floor
+  iou_thr: 0.4       # below this IoU with a same-class GT box → false positive
+  limit: null        # cap images scanned (null = all); set small for quick runs
+
 labelstudio:
   # How task image references are emitted for the Label Studio UI.
   #   http:        absolute URL served by the fileserver container (reliable demo)

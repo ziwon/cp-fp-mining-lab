@@ -26,6 +26,9 @@ clip = [
 serve = [
     "flask>=3.0",
 ]
+detect = [
+    "ultralytics>=8.2",
+]
 
 [dependency-groups]
 dev = [
