@@ -18,6 +18,8 @@ def main() -> None:
     parser.add_argument("--limit", type=int, default=m["limit"])
     parser.add_argument("--conf", type=float, default=m["conf"])
     parser.add_argument("--iou", type=float, default=m["iou_thr"])
+    parser.add_argument("--images", default=m["source_images"], help="override source images dir")
+    parser.add_argument("--labels", default=m["source_labels"], help="override source labels dir")
     args = parser.parse_args()
 
     weights = Path(args.weights)
@@ -27,8 +29,8 @@ def main() -> None:
     detector = YoloDetector.load(weights)
     df = collect_false_positives(
         detector,
-        images_dir=m["source_images"],
-        labels_dir=m["source_labels"],
+        images_dir=args.images,
+        labels_dir=args.labels,
         crops_dir=m["crops_dir"],
         model_version=weights.stem if weights.stem != "best" else f"yolo-{weights.parent.parent.name}",
         conf=args.conf,

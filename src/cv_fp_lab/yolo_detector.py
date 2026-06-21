@@ -34,6 +34,29 @@ def write_dfire_yaml(
     return output_path
 
 
+def write_dataset_yaml(
+    output_path: str | Path,
+    train_dirs: list[str | Path],
+    val_dir: str | Path,
+    classes: dict[int, str] | None = None,
+) -> Path:
+    """Write a YOLO dataset YAML whose train is a list of split roots.
+
+    Used to oversample mined hard negatives by training on
+    ``[base_train, hard_negatives]`` while validating on the frozen eval set.
+    """
+    classes = classes or DFIRE_CLASSES
+    output_path = Path(output_path)
+    spec = {
+        "train": [str((Path(d) / "images").resolve()) for d in train_dirs],
+        "val": str((Path(val_dir) / "images").resolve()),
+        "names": {int(k): v for k, v in classes.items()},
+    }
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(yaml.safe_dump(spec, sort_keys=False), encoding="utf-8")
+    return output_path
+
+
 class YoloDetector:
     """Thin adapter over Ultralytics YOLO for the fire/smoke detector.
 
