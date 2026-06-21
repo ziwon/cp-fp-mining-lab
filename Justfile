@@ -22,6 +22,17 @@ check:
 train:
     uv run python scripts/06_train_detector.py
 
+# Real-data track (needs `uv sync --extra detect`): train a YOLO fire/smoke
+# detector on D-Fire, then mine real false positives into the pipeline.
+detect-prepare:
+    uv run python scripts/10_prepare_dfire.py
+
+detect-train:
+    uv run python scripts/11_train_yolo_detector.py
+
+mine-fp:
+    uv run python scripts/12_mine_false_positives.py
+
 serve-ml:
     uv run python services/ml_backend.py
 
