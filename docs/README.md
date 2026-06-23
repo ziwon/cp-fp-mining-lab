@@ -10,6 +10,7 @@
 
 - Overall architecture: [`architecture.md`](architecture.md)
 - Active-learning loop design: [`active_learning.md`](active_learning.md)
+- LLM autolabeling and DuckLake planning: [`llm_autolabeling_ducklake_plan.md`](llm_autolabeling_ducklake_plan.md)
 - Hybrid/Kubernetes production target: [`hybrid_k8s_architecture.md`](hybrid_k8s_architecture.md)
 
 ## Label and review data
@@ -20,4 +21,4 @@
 
 - First-time local demo: [`demo_walkthrough.md`](demo_walkthrough.md) -> [`label_studio_setup.md`](label_studio_setup.md)
 - Real-data experiment: [`real_data.md`](real_data.md) -> [`fp_taxonomy.md`](fp_taxonomy.md) -> [`label_studio_setup.md`](label_studio_setup.md)
-- Production migration: [`architecture.md`](architecture.md) -> [`active_learning.md`](active_learning.md) -> [`hybrid_k8s_architecture.md`](hybrid_k8s_architecture.md)
+- Production migration: [`architecture.md`](architecture.md) -> [`active_learning.md`](active_learning.md) -> [`llm_autolabeling_ducklake_plan.md`](llm_autolabeling_ducklake_plan.md) -> [`hybrid_k8s_architecture.md`](hybrid_k8s_architecture.md)

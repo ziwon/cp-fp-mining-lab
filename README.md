@@ -133,7 +133,12 @@ Key changes versus today's flow:
 
 See [`docs/active_learning.md`](docs/active_learning.md) for the full design.
 
-For full design details, GPU/CPU scale-out, and the production hybrid Kubernetes target, see [`docs/architecture.md`](docs/architecture.md) and [`docs/hybrid_k8s_architecture.md`](docs/hybrid_k8s_architecture.md).
+For next-step planning around LLM vision autolabeling and DuckLake-backed
+metadata lineage, see
+[`docs/llm_autolabeling_ducklake_plan.md`](docs/llm_autolabeling_ducklake_plan.md).
+For full design details, GPU/CPU scale-out, and the production hybrid Kubernetes
+target, see [`docs/architecture.md`](docs/architecture.md) and
+[`docs/hybrid_k8s_architecture.md`](docs/hybrid_k8s_architecture.md).
 
 ## Repository layout
 
@@ -153,6 +158,7 @@ cv-fp-mining-lab/
 │   ├── fp_taxonomy.md
 │   ├── hybrid_k8s_architecture.md
 │   ├── label_studio_setup.md
+│   ├── llm_autolabeling_ducklake_plan.md
 │   └── real_data.md
 ├── notebooks/
 │   └── 01_fp_clustering.ipynb
@@ -476,6 +482,12 @@ production migration.
   opening local run folders.
 - **Real online loop.** Connect the Label Studio ML backend and webhook path to
   the real YOLO detector, not only the synthetic sklearn smoke-test detector.
+- **LLM-assisted review.** Add multimodal LLM pre-annotations as Label Studio
+  predictions, use detector/LLM disagreement for review prioritization, and keep
+  human validation before any auto-accept path.
+- **DuckLake lineage layer.** Sync mined events, embeddings, clusters, LLM labels,
+  human reviews, dataset versions, and gate results into queryable DuckLake
+  tables so dataset snapshots and model promotions can be audited with SQL.
 - **Production data integration.** Replace D-Fire paths with CCTV/object-storage
   paths and attach production metadata from PostgreSQL, Kafka, or the event store.
 - **Orchestration.** Promote the script chain to Argo Workflows, Airflow, or
