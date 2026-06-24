@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="900" viewBox="0 0 1400 900">
+  <rect width="1400" height="900" fill="#f8fafc"/>
+  <rect x="70" y="60" width="1260" height="780" rx="24" fill="#ffffff" stroke="#dbe4f0" stroke-width="2"/>
+  <text x="110" y="112" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#0f172a">Production false-positive mining workflow</text>
+
+  <rect x="120" y="180" width="220" height="110" rx="16" fill="#e0f2fe" stroke="#0284c7" stroke-width="2"/>
+  <text x="155" y="220" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#075985">1. Mine candidates</text>
+  <text x="155" y="248" font-family="Arial, sans-serif" font-size="14" fill="#334155">Event query + FP/FN signals</text>
+
+  <rect x="380" y="180" width="220" height="110" rx="16" fill="#dcfce7" stroke="#16a34a" stroke-width="2"/>
+  <text x="415" y="220" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#166534">2. Resolve assets</text>
+  <text x="415" y="248" font-family="Arial, sans-serif" font-size="14" fill="#334155">Frames, crops, object URIs</text>
+
+  <rect x="640" y="180" width="220" height="110" rx="16" fill="#fef3c7" stroke="#d97706" stroke-width="2"/>
+  <text x="675" y="220" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#92400e">3. Embed + cluster</text>
+  <text x="675" y="248" font-family="Arial, sans-serif" font-size="14" fill="#334155">Embeddings, UMAP, HDBSCAN</text>
+
+  <rect x="900" y="180" width="220" height="110" rx="16" fill="#f5e8ff" stroke="#9333ea" stroke-width="2"/>
+  <text x="935" y="220" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#6b21a8">4. Rank for review</text>
+  <text x="935" y="248" font-family="Arial, sans-serif" font-size="14" fill="#334155">Uncertainty + diversity + recurrence</text>
+
+  <line x1="340" y1="235" x2="380" y2="235" stroke="#64748b" stroke-width="3" marker-end="url(#arrow)"/>
+  <line x1="600" y1="235" x2="640" y2="235" stroke="#64748b" stroke-width="3" marker-end="url(#arrow)"/>
+  <line x1="860" y1="235" x2="900" y2="235" stroke="#64748b" stroke-width="3" marker-end="url(#arrow)"/>
+
+  <rect x="300" y="360" width="220" height="120" rx="16" fill="#ffe4e6" stroke="#e11d48" stroke-width="2"/>
+  <text x="335" y="400" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#9f1239">5. Human review</text>
+  <text x="335" y="428" font-family="Arial, sans-serif" font-size="14" fill="#334155">Label Studio + pre-labels</text>
+
+  <rect x="560" y="360" width="220" height="120" rx="16" fill="#e2e8f0" stroke="#475569" stroke-width="2"/>
+  <text x="595" y="400" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#334155">6. Sync lineage</text>
+  <text x="595" y="428" font-family="Arial, sans-serif" font-size="14" fill="#334155">DuckLake + PostgreSQL</text>
+
+  <rect x="820" y="360" width="220" height="120" rx="16" fill="#ede9fe" stroke="#7c3aed" stroke-width="2"/>
+  <text x="855" y="400" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#5b21b6">7. Train + gate</text>
+  <text x="855" y="428" font-family="Arial, sans-serif" font-size="14" fill="#334155">Dataset build, eval, promote</text>
+
+  <line x1="500" y1="420" x2="560" y2="420" stroke="#64748b" stroke-width="3" marker-end="url(#arrow)"/>
+  <line x1="780" y1="420" x2="820" y2="420" stroke="#64748b" stroke-width="3" marker-end="url(#arrow)"/>
+  <line x1="1010" y1="290" x2="1010" y2="360" stroke="#64748b" stroke-width="3" marker-end="url(#arrow)"/>
+
+  <rect x="240" y="540" width="920" height="220" rx="18" fill="#f8fafc" stroke="#cbd5e1" stroke-width="2"/>
+  <text x="270" y="580" font-family="Arial, sans-serif" font-size="21" font-weight="700" fill="#0f172a">Operational controls</text>
+  <text x="270" y="616" font-family="Arial, sans-serif" font-size="15" fill="#334155">• Idempotent review sync and batch registration</text>
+  <text x="270" y="642" font-family="Arial, sans-serif" font-size="15" fill="#334155">• Immutable dataset manifests tied to DuckLake snapshots</text>
+  <text x="270" y="668" font-family="Arial, sans-serif" font-size="15" fill="#334155">• W&amp;B or MLflow tracking for artifacts, metrics, and promotion state</text>
+  <text x="270" y="694" font-family="Arial, sans-serif" font-size="15" fill="#334155">• Observability, backup, RBAC, retention, and secret handling</text>
+
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#64748b"/>
+    </marker>
+  </defs>
+</svg>

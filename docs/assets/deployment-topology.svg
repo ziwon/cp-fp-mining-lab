@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="920" viewBox="0 0 1400 920">
+  <rect width="1400" height="920" fill="#f8fafc"/>
+  <rect x="70" y="60" width="1260" height="800" rx="24" fill="#ffffff" stroke="#dce6f2" stroke-width="2"/>
+  <text x="110" y="112" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#111827">Deployment topology</text>
+  <text x="110" y="142" font-family="Arial, sans-serif" font-size="16" fill="#4b5563">Local lab → GPU server → on-prem Kubernetes → hybrid cloud</text>
+
+  <rect x="120" y="180" width="260" height="160" rx="18" fill="#e0f2fe" stroke="#0284c7" stroke-width="2"/>
+  <text x="150" y="220" font-family="Arial, sans-serif" font-size="20" font-weight="700" fill="#075985">Local Lab</text>
+  <text x="150" y="250" font-family="Arial, sans-serif" font-size="14" fill="#334155">Docker Compose</text>
+  <text x="150" y="276" font-family="Arial, sans-serif" font-size="14" fill="#334155">MinIO, Label Studio, W&amp;B</text>
+  <text x="150" y="302" font-family="Arial, sans-serif" font-size="14" fill="#334155">Synthetic and real-data paths</text>
+
+  <rect x="430" y="180" width="260" height="160" rx="18" fill="#dcfce7" stroke="#16a34a" stroke-width="2"/>
+  <text x="460" y="220" font-family="Arial, sans-serif" font-size="20" font-weight="700" fill="#166534">Single GPU Server</text>
+  <text x="460" y="250" font-family="Arial, sans-serif" font-size="14" fill="#334155">GPU embedding jobs</text>
+  <text x="460" y="276" font-family="Arial, sans-serif" font-size="14" fill="#334155">Host storage or MinIO</text>
+  <text x="460" y="302" font-family="Arial, sans-serif" font-size="14" fill="#334155">Manual review loop</text>
+
+  <rect x="740" y="180" width="260" height="160" rx="18" fill="#fef3c7" stroke="#d97706" stroke-width="2"/>
+  <text x="770" y="220" font-family="Arial, sans-serif" font-size="20" font-weight="700" fill="#92400e">On-Prem Kubernetes</text>
+  <text x="770" y="250" font-family="Arial, sans-serif" font-size="14" fill="#334155">Argo Workflows</text>
+  <text x="770" y="276" font-family="Arial, sans-serif" font-size="14" fill="#334155">DuckLake + PostgreSQL</text>
+  <text x="770" y="302" font-family="Arial, sans-serif" font-size="14" fill="#334155">GPU/CPU node pools</text>
+
+  <rect x="1050" y="180" width="220" height="160" rx="18" fill="#f5e8ff" stroke="#9333ea" stroke-width="2"/>
+  <text x="1078" y="220" font-family="Arial, sans-serif" font-size="20" font-weight="700" fill="#6b21a8">Hybrid Cloud</text>
+  <text x="1078" y="250" font-family="Arial, sans-serif" font-size="14" fill="#334155">Managed object storage</text>
+  <text x="1078" y="276" font-family="Arial, sans-serif" font-size="14" fill="#334155">W&amp;B / MLflow</text>
+  <text x="1078" y="302" font-family="Arial, sans-serif" font-size="14" fill="#334155">Observability + backups</text>
+
+  <line x1="380" y1="260" x2="430" y2="260" stroke="#64748b" stroke-width="3" marker-end="url(#arrow)"/>
+  <line x1="690" y1="260" x2="740" y2="260" stroke="#64748b" stroke-width="3" marker-end="url(#arrow)"/>
+  <line x1="1000" y1="260" x2="1050" y2="260" stroke="#64748b" stroke-width="3" marker-end="url(#arrow)"/>
+
+  <rect x="220" y="420" width="960" height="320" rx="20" fill="#f8fafc" stroke="#cbd5e1" stroke-width="2"/>
+  <text x="250" y="470" font-family="Arial, sans-serif" font-size="20" font-weight="700" fill="#0f172a">Cross-cutting platform services</text>
+  <text x="250" y="510" font-family="Arial, sans-serif" font-size="15" fill="#334155">• API gateway / ingest endpoint for production events</text>
+  <text x="250" y="540" font-family="Arial, sans-serif" font-size="15" fill="#334155">• Review webhooks and task sync into the lakehouse</text>
+  <text x="250" y="570" font-family="Arial, sans-serif" font-size="15" fill="#334155">• Secret management, RBAC, and private networking</text>
+  <text x="250" y="600" font-family="Arial, sans-serif" font-size="15" fill="#334155">• Retention, backup, and data freshness workflows</text>
+  <text x="250" y="630" font-family="Arial, sans-serif" font-size="15" fill="#334155">• Dataset manifests and model promotion lifecycle</text>
+
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#64748b"/>
+    </marker>
+  </defs>
+</svg>

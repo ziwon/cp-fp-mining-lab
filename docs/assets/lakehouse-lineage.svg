@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="860" viewBox="0 0 1400 860">
+  <rect width="1400" height="860" fill="#f8fafc"/>
+  <rect x="70" y="60" width="1260" height="740" rx="24" fill="#ffffff" stroke="#dbe4f0" stroke-width="2"/>
+  <text x="110" y="112" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#0f172a">DuckLake lineage model</text>
+  <text x="110" y="144" font-family="Arial, sans-serif" font-size="16" fill="#475569">Row-level tables connect source events to reviewed labels, dataset snapshots, and promotion decisions</text>
+
+  <rect x="120" y="210" width="210" height="116" rx="16" fill="#e0f2fe" stroke="#0284c7" stroke-width="2"/>
+  <text x="150" y="250" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#075985">events</text>
+  <text x="150" y="278" font-family="Arial, sans-serif" font-size="14" fill="#334155">event_id, camera, site</text>
+  <text x="150" y="302" font-family="Arial, sans-serif" font-size="14" fill="#334155">frame_uri, crop_uri</text>
+
+  <rect x="390" y="150" width="220" height="116" rx="16" fill="#dcfce7" stroke="#16a34a" stroke-width="2"/>
+  <text x="420" y="190" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#166534">detector_predictions</text>
+  <text x="420" y="218" font-family="Arial, sans-serif" font-size="14" fill="#334155">model_version</text>
+  <text x="420" y="242" font-family="Arial, sans-serif" font-size="14" fill="#334155">class, confidence, bbox</text>
+
+  <rect x="390" y="300" width="220" height="116" rx="16" fill="#fef3c7" stroke="#d97706" stroke-width="2"/>
+  <text x="420" y="340" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#92400e">embeddings</text>
+  <text x="420" y="368" font-family="Arial, sans-serif" font-size="14" fill="#334155">embedding_model</text>
+  <text x="420" y="392" font-family="Arial, sans-serif" font-size="14" fill="#334155">vector object URI</text>
+
+  <rect x="670" y="300" width="210" height="116" rx="16" fill="#f5e8ff" stroke="#9333ea" stroke-width="2"/>
+  <text x="700" y="340" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#6b21a8">clusters</text>
+  <text x="700" y="368" font-family="Arial, sans-serif" font-size="14" fill="#334155">cluster_id</text>
+  <text x="700" y="392" font-family="Arial, sans-serif" font-size="14" fill="#334155">representative score</text>
+
+  <rect x="670" y="150" width="210" height="116" rx="16" fill="#ffe4e6" stroke="#e11d48" stroke-width="2"/>
+  <text x="700" y="190" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#9f1239">acquisition_queue</text>
+  <text x="700" y="218" font-family="Arial, sans-serif" font-size="14" fill="#334155">review_batch_id</text>
+  <text x="700" y="242" font-family="Arial, sans-serif" font-size="14" fill="#334155">rank score, status</text>
+
+  <rect x="940" y="150" width="220" height="116" rx="16" fill="#ede9fe" stroke="#7c3aed" stroke-width="2"/>
+  <text x="970" y="190" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#5b21b6">human_reviews</text>
+  <text x="970" y="218" font-family="Arial, sans-serif" font-size="14" fill="#334155">annotation_id</text>
+  <text x="970" y="242" font-family="Arial, sans-serif" font-size="14" fill="#334155">fp_type, bbox_valid</text>
+
+  <rect x="940" y="300" width="220" height="116" rx="16" fill="#f1f5f9" stroke="#64748b" stroke-width="2"/>
+  <text x="970" y="340" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#334155">llm_prelabels</text>
+  <text x="970" y="368" font-family="Arial, sans-serif" font-size="14" fill="#334155">oracle_model</text>
+  <text x="970" y="392" font-family="Arial, sans-serif" font-size="14" fill="#334155">prompt, label, confidence</text>
+
+  <rect x="360" y="550" width="260" height="126" rx="18" fill="#ecfeff" stroke="#0891b2" stroke-width="2"/>
+  <text x="395" y="594" font-family="Arial, sans-serif" font-size="19" font-weight="700" fill="#0e7490">dataset_manifests</text>
+  <text x="395" y="624" font-family="Arial, sans-serif" font-size="14" fill="#334155">dataset_version, snapshot_id</text>
+  <text x="395" y="648" font-family="Arial, sans-serif" font-size="14" fill="#334155">train/eval split URIs</text>
+
+  <rect x="760" y="550" width="260" height="126" rx="18" fill="#fff7ed" stroke="#ea580c" stroke-width="2"/>
+  <text x="795" y="594" font-family="Arial, sans-serif" font-size="19" font-weight="700" fill="#9a3412">eval_gate_results</text>
+  <text x="795" y="624" font-family="Arial, sans-serif" font-size="14" fill="#334155">candidate model, metrics</text>
+  <text x="795" y="648" font-family="Arial, sans-serif" font-size="14" fill="#334155">promotion decision</text>
+
+  <line x1="330" y1="268" x2="390" y2="208" stroke="#64748b" stroke-width="3" marker-end="url(#arrow)"/>
+  <line x1="330" y1="268" x2="390" y2="358" stroke="#64748b" stroke-width="3" marker-end="url(#arrow)"/>
+  <line x1="610" y1="358" x2="670" y2="358" stroke="#64748b" stroke-width="3" marker-end="url(#arrow)"/>
+  <line x1="880" y1="208" x2="940" y2="208" stroke="#64748b" stroke-width="3" marker-end="url(#arrow)"/>
+  <line x1="880" y1="358" x2="940" y2="358" stroke="#64748b" stroke-width="3" marker-end="url(#arrow)"/>
+  <line x1="775" y1="300" x2="775" y2="266" stroke="#64748b" stroke-width="3" marker-end="url(#arrow)"/>
+  <line x1="1050" y1="266" x2="560" y2="550" stroke="#64748b" stroke-width="3" stroke-dasharray="7 7" marker-end="url(#arrow)"/>
+  <line x1="490" y1="676" x2="760" y2="613" stroke="#64748b" stroke-width="3" marker-end="url(#arrow)"/>
+
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#64748b"/>
+    </marker>
+  </defs>
+</svg>

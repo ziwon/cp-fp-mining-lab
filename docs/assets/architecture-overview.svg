@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="860" viewBox="0 0 1400 860">
+  <rect width="1400" height="860" fill="#f7f9fc"/>
+  <rect x="90" y="70" width="1220" height="720" rx="24" fill="#ffffff" stroke="#d6deeb" stroke-width="2"/>
+  <text x="120" y="120" font-family="Arial, sans-serif" font-size="28" font-weight="700" fill="#14213d">CV False Positive Mining Platform</text>
+  <text x="120" y="152" font-family="Arial, sans-serif" font-size="16" fill="#4b5563">Production-grade feedback loop for model failures, review, lineage, and retraining</text>
+
+  <rect x="130" y="200" width="220" height="140" rx="16" fill="#e8f1ff" stroke="#5b8def" stroke-width="2"/>
+  <text x="155" y="240" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#163b8c">Production CV</text>
+  <text x="155" y="268" font-family="Arial, sans-serif" font-size="14" fill="#4b5563">Inference service</text>
+  <text x="155" y="292" font-family="Arial, sans-serif" font-size="14" fill="#4b5563">Events, bboxes, model versions</text>
+
+  <rect x="410" y="200" width="220" height="140" rx="16" fill="#eefbf4" stroke="#2f9e44" stroke-width="2"/>
+  <text x="440" y="240" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#1f5e2b">Argo Workflows</text>
+  <text x="440" y="268" font-family="Arial, sans-serif" font-size="14" fill="#4b5563">Mining, embedding, clustering</text>
+  <text x="440" y="292" font-family="Arial, sans-serif" font-size="14" fill="#4b5563">Dataset build, eval, promotion</text>
+
+  <rect x="690" y="200" width="220" height="140" rx="16" fill="#fff4e6" stroke="#d97706" stroke-width="2"/>
+  <text x="725" y="240" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#9a4b00">Label Studio</text>
+  <text x="725" y="268" font-family="Arial, sans-serif" font-size="14" fill="#4b5563">Human review UI</text>
+  <text x="725" y="292" font-family="Arial, sans-serif" font-size="14" fill="#4b5563">Pre-labels + review decisions</text>
+
+  <rect x="970" y="200" width="220" height="140" rx="16" fill="#f4ebff" stroke="#7c3aed" stroke-width="2"/>
+  <text x="1005" y="240" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#5b21b6">DuckLake + Postgres</text>
+  <text x="1005" y="268" font-family="Arial, sans-serif" font-size="14" fill="#4b5563">Lineage, metadata, snapshots</text>
+  <text x="1005" y="292" font-family="Arial, sans-serif" font-size="14" fill="#4b5563">Events, reviews, datasets</text>
+
+  <line x1="350" y1="270" x2="410" y2="270" stroke="#64748b" stroke-width="3" marker-end="url(#arrow)"/>
+  <line x1="630" y1="270" x2="690" y2="270" stroke="#64748b" stroke-width="3" marker-end="url(#arrow)"/>
+  <line x1="910" y1="270" x2="970" y2="270" stroke="#64748b" stroke-width="3" marker-end="url(#arrow)"/>
+
+  <rect x="240" y="420" width="240" height="220" rx="16" fill="#f8fafc" stroke="#94a3b8" stroke-width="2"/>
+  <text x="270" y="460" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#334155">Object Storage</text>
+  <text x="270" y="490" font-family="Arial, sans-serif" font-size="14" fill="#4b5563">Raw frames, crops, embeddings</text>
+  <text x="270" y="516" font-family="Arial, sans-serif" font-size="14" fill="#4b5563">Parquet, manifests, models</text>
+  <text x="270" y="542" font-family="Arial, sans-serif" font-size="14" fill="#4b5563">MinIO / S3-compatible</text>
+
+  <rect x="540" y="420" width="240" height="220" rx="16" fill="#f8fafc" stroke="#94a3b8" stroke-width="2"/>
+  <text x="570" y="460" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#334155">ML Lifecycle</text>
+  <text x="570" y="490" font-family="Arial, sans-serif" font-size="14" fill="#4b5563">W&amp;B / MLflow</text>
+  <text x="570" y="516" font-family="Arial, sans-serif" font-size="14" fill="#4b5563">Runs, artifacts, metrics</text>
+  <text x="570" y="542" font-family="Arial, sans-serif" font-size="14" fill="#4b5563">Candidate/staging/production</text>
+
+  <rect x="840" y="420" width="240" height="220" rx="16" fill="#f8fafc" stroke="#94a3b8" stroke-width="2"/>
+  <text x="870" y="460" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#334155">Operations</text>
+  <text x="870" y="490" font-family="Arial, sans-serif" font-size="14" fill="#4b5563">Prometheus, Grafana, Loki</text>
+  <text x="870" y="516" font-family="Arial, sans-serif" font-size="14" fill="#4b5563">Alerts, retention, backup</text>
+  <text x="870" y="542" font-family="Arial, sans-serif" font-size="14" fill="#4b5563">RBAC, secrets, audit</text>
+
+  <line x1="520" y1="340" x2="520" y2="420" stroke="#64748b" stroke-width="2" stroke-dasharray="6 6"/>
+  <line x1="800" y1="340" x2="800" y2="420" stroke="#64748b" stroke-width="2" stroke-dasharray="6 6"/>
+  <line x1="1080" y1="340" x2="1080" y2="420" stroke="#64748b" stroke-width="2" stroke-dasharray="6 6"/>
+
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#64748b"/>
+    </marker>
+  </defs>
+</svg>

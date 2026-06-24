@@ -136,8 +136,10 @@ See [`docs/active_learning.md`](docs/active_learning.md) for the full design.
 For next-step planning around LLM vision autolabeling and DuckLake-backed
 metadata lineage, see
 [`docs/llm_autolabeling_ducklake_plan.md`](docs/llm_autolabeling_ducklake_plan.md).
-For full design details, GPU/CPU scale-out, and the production hybrid Kubernetes
-target, see [`docs/architecture.md`](docs/architecture.md) and
+For full design details, Argo/DuckLake production architecture, GPU/CPU scale-out,
+and the production hybrid Kubernetes target, see
+[`docs/architecture.md`](docs/architecture.md),
+[`docs/production_architecture.md`](docs/production_architecture.md), and
 [`docs/hybrid_k8s_architecture.md`](docs/hybrid_k8s_architecture.md).
 
 ## Repository layout
@@ -159,6 +161,7 @@ cv-fp-mining-lab/
 │   ├── hybrid_k8s_architecture.md
 │   ├── label_studio_setup.md
 │   ├── llm_autolabeling_ducklake_plan.md
+│   ├── production_architecture.md
 │   └── real_data.md
 ├── notebooks/
 │   └── 01_fp_clustering.ipynb
