@@ -1,25 +1,42 @@
 # Docs
 
-## Run the pipeline
+The docs are organized by repo status:
 
-- Local synthetic demo: [`demo_walkthrough.md`](demo_walkthrough.md)
-- Real D-Fire/YOLO pipeline: [`real_data.md`](real_data.md)
-- Label Studio setup/import/export: [`label_studio_setup.md`](label_studio_setup.md)
+- [`current/`](current/) — implemented behavior that can run in this repository
+  today.
+- [`future/`](future/) — production architecture and roadmap material.
+- [`reference/`](reference/) — stable taxonomy/reference material.
+- [`assets/`](assets/) — screenshots and architecture graphics used by the docs.
 
-## Understand the system
+## Current Implementation
 
-- Overall architecture: [`architecture.md`](architecture.md)
-- Active-learning loop design: [`active_learning.md`](active_learning.md)
-- LLM autolabeling and DuckLake planning: [`llm_autolabeling_ducklake_plan.md`](llm_autolabeling_ducklake_plan.md)
-- Production Argo/DuckLake architecture: [`production_architecture.md`](production_architecture.md)
-- Hybrid/Kubernetes production target: [`hybrid_k8s_architecture.md`](hybrid_k8s_architecture.md)
+- Local synthetic demo: [`current/demo_walkthrough.md`](current/demo_walkthrough.md)
+- Real D-Fire/YOLO pipeline: [`current/real_data.md`](current/real_data.md)
+- Label Studio setup/import/export:
+  [`current/label_studio_setup.md`](current/label_studio_setup.md)
+- Compact lab architecture: [`current/architecture.md`](current/architecture.md)
+- Active-learning loop: [`current/active_learning.md`](current/active_learning.md)
 
-## Label and review data
+## Future Production Design
 
-- False-positive label taxonomy: [`fp_taxonomy.md`](fp_taxonomy.md)
+- Production plan:
+  [`future/production_plan.md`](future/production_plan.md)
 
-## Suggested reading paths
+## Reference
 
-- First-time local demo: [`demo_walkthrough.md`](demo_walkthrough.md) -> [`label_studio_setup.md`](label_studio_setup.md)
-- Real-data experiment: [`real_data.md`](real_data.md) -> [`fp_taxonomy.md`](fp_taxonomy.md) -> [`label_studio_setup.md`](label_studio_setup.md)
-- Production migration: [`architecture.md`](architecture.md) -> [`active_learning.md`](active_learning.md) -> [`llm_autolabeling_ducklake_plan.md`](llm_autolabeling_ducklake_plan.md) -> [`production_architecture.md`](production_architecture.md) -> [`hybrid_k8s_architecture.md`](hybrid_k8s_architecture.md)
+- False-positive label taxonomy:
+  [`reference/fp_taxonomy.md`](reference/fp_taxonomy.md)
+
+## Suggested Reading Paths
+
+- First-time local demo:
+  [`current/demo_walkthrough.md`](current/demo_walkthrough.md) ->
+  [`current/label_studio_setup.md`](current/label_studio_setup.md)
+- Real-data experiment:
+  [`current/real_data.md`](current/real_data.md) ->
+  [`reference/fp_taxonomy.md`](reference/fp_taxonomy.md) ->
+  [`current/label_studio_setup.md`](current/label_studio_setup.md)
+- Production migration:
+  [`current/architecture.md`](current/architecture.md) ->
+  [`current/active_learning.md`](current/active_learning.md) ->
+  [`future/production_plan.md`](future/production_plan.md)

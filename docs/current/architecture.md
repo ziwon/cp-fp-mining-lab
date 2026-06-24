@@ -4,6 +4,11 @@
 
 Build a data-centric feedback loop for production computer vision systems that suffer from repeated false positives.
 
+This document is the compact architecture map for the lab. For the consolidated
+future production plan with Argo Workflows, DuckLake, PostgreSQL-backed metadata,
+hybrid deployment, LLM/VLM pre-labeling, and operations controls, see
+[`../future/production_plan.md`](../future/production_plan.md).
+
 ## Pipeline
 
 ```text
@@ -31,6 +36,11 @@ W&B
   Runs: training/evaluation metrics
   Registry: candidate/staging/production model
 ```
+
+In the lab, W&B is enough to demonstrate dataset artifacts, visual tables,
+training runs, and promotion handoff. In production, DuckLake should become the
+row-level dataset lineage source of truth while W&B or MLflow remains the ML
+lifecycle surface for runs, reports, artifacts, and registry aliases.
 
 ## GPU server deployment
 
@@ -79,7 +89,9 @@ Scale-out boundaries:
 - **Metadata contract**: move event metadata from CSV to PostgreSQL, BigQuery, Snowflake, or Kafka-derived parquet tables.
 - **Workflow orchestration**: run nightly or hourly mining through Argo Workflows, Airflow, Prefect, or a cloud batch service.
 - **Review loop**: keep Label Studio asynchronous; mining can export tasks and continue while reviewers work.
-- **Lineage**: publish every curated dataset as a W&B Artifact with source query, model version, config hash, and review export version.
+- **Lineage**: publish every curated dataset as a W&B/MLflow artifact and sync
+  event-level metadata into DuckLake so source events, review batches, dataset
+  snapshots, and gate results can be audited with SQL.
 
 Production workflow boundaries:
 
@@ -89,7 +101,8 @@ Production workflow boundaries:
 | Embed FP crops | `scripts/01_extract_embeddings.py --method clip` | GPU `Job` or batch worker | `embeddings.npy` |
 | Cluster and rank | `scripts/02_cluster_false_positives.py`, `scripts/03_export_for_label_studio.py` | CPU `Job` | `fp_clusters.csv`, `labelstudio_tasks.json` |
 | Human review | Label Studio | `Deployment` + managed DB/object storage | reviewed export |
-| Build hard negatives | `scripts/14_build_hard_negatives.py` | CPU `Job` after review export | YOLO hard-negative dataset, W&B `build-hardneg` run |
+| Sync reviewed labels | `scripts/04_import_label_studio_export.py` | CPU `Job` / Argo step after webhook or export | reviewed CSV now; DuckLake `human_reviews` table in production |
+| Build hard negatives | `scripts/14_build_hard_negatives.py` | CPU `Job` after review sync | YOLO hard-negative dataset, manifest, W&B `build-hardneg` run |
 | Fine-tune detector | `scripts/15_retrain_with_hard_negatives.py` | GPU training `Job` | candidate `.pt`, W&B `yolo-retrain` run |
 | Evaluate and gate | `scripts/13_evaluate_and_gate.py` | CPU/GPU eval `Job` with protected eval data | gate decision, registry alias, W&B `eval-gate` run |
 
@@ -101,13 +114,17 @@ Recommended production progression:
 4. **Elastic mining**: shard embedding extraction across GPU jobs and merge embeddings before clustering.
 5. **Managed platform**: managed object storage, managed PostgreSQL, cloud secrets, observability, and model/data registry.
 
-For the production hybrid Kubernetes target architecture, see [`docs/hybrid_k8s_architecture.md`](hybrid_k8s_architecture.md).
+For the consolidated Argo/DuckLake production platform plan, see
+[`../future/production_plan.md`](../future/production_plan.md).
 
 ## Production extension points
 
 - Replace synthetic images with S3/MinIO image paths.
 - Add PostgreSQL/Kafka event extraction.
+- Add DuckLake sync for events, predictions, embeddings, clusters, acquisition
+  queues, human reviews, dataset manifests, and gate results.
 - Generate bbox crops as separate artifacts.
 - Use DINOv2 or CLIP embeddings.
 - Use FiftyOne for visual EDA.
-- Trigger this pipeline nightly via Argo Workflows or Airflow.
+- Trigger this pipeline nightly via Argo Workflows or Airflow, with GPU/CPU
+  stages separated and dataset builds tied to immutable snapshot IDs.

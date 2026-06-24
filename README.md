@@ -131,16 +131,13 @@ Key changes versus today's flow:
 - **Live model in the loop.** A Label Studio ML backend serves the current detector for in-UI predictions; promoting a new model in the W&B Registry swaps the backend.
 - **Event-driven retraining.** Label Studio `ANNOTATION_CREATED`/project webhooks trigger the dataset builder and a retrain → regression-eval → registry-promotion cycle.
 
-See [`docs/active_learning.md`](docs/active_learning.md) for the full design.
+See [`docs/current/active_learning.md`](docs/current/active_learning.md) for the full design.
 
-For next-step planning around LLM vision autolabeling and DuckLake-backed
-metadata lineage, see
-[`docs/llm_autolabeling_ducklake_plan.md`](docs/llm_autolabeling_ducklake_plan.md).
-For full design details, Argo/DuckLake production architecture, GPU/CPU scale-out,
-and the production hybrid Kubernetes target, see
-[`docs/architecture.md`](docs/architecture.md),
-[`docs/production_architecture.md`](docs/production_architecture.md), and
-[`docs/hybrid_k8s_architecture.md`](docs/hybrid_k8s_architecture.md).
+For the compact lab architecture, see
+[`docs/current/architecture.md`](docs/current/architecture.md). For the future
+Argo/DuckLake production plan, hybrid deployment target, and optional LLM/VLM
+pre-labeling roadmap, see
+[`docs/future/production_plan.md`](docs/future/production_plan.md).
 
 ## Repository layout
 
@@ -154,15 +151,16 @@ cv-fp-mining-lab/
 │   └── labelstudio_exports/  # sample Label Studio export JSON
 ├── docs/
 │   ├── README.md
-│   ├── active_learning.md
-│   ├── architecture.md
-│   ├── demo_walkthrough.md
-│   ├── fp_taxonomy.md
-│   ├── hybrid_k8s_architecture.md
-│   ├── label_studio_setup.md
-│   ├── llm_autolabeling_ducklake_plan.md
-│   ├── production_architecture.md
-│   └── real_data.md
+│   ├── current/
+│   │   ├── active_learning.md
+│   │   ├── architecture.md
+│   │   ├── demo_walkthrough.md
+│   │   ├── label_studio_setup.md
+│   │   └── real_data.md
+│   ├── future/
+│   │   └── production_plan.md
+│   ├── reference/
+│   │   └── fp_taxonomy.md
 ├── notebooks/
 │   └── 01_fp_clustering.ipynb
 ├── scripts/
@@ -195,7 +193,7 @@ cv-fp-mining-lab/
 ## Quick start
 
 For the full local active-learning loop (Label Studio review → webhook retrain →
-gate → W&B), follow [`docs/demo_walkthrough.md`](docs/demo_walkthrough.md).
+gate → W&B), follow [`docs/current/demo_walkthrough.md`](docs/current/demo_walkthrough.md).
 
 ### Demo screenshots
 
@@ -292,7 +290,7 @@ uv run python scripts/13_evaluate_and_gate.py --candidate /data/cpfp-output/yolo
 
 W&B runs are emitted for `mine-fp`, `build-hardneg`, `yolo-retrain`, and
 `eval-gate`. They default to offline mode and sync when `WANDB_MODE=online` is
-configured. See [`docs/real_data.md`](docs/real_data.md).
+configured. See [`docs/current/real_data.md`](docs/current/real_data.md).
 
 ### Synthetic smoke-test loop
 
@@ -438,7 +436,7 @@ uv run python services/webhook.py        # http://localhost:9091
 ```
 
 Under Docker Compose both run as services (`ml-backend`, `webhook`). See
-[`docs/active_learning.md`](docs/active_learning.md) for the design.
+[`docs/current/active_learning.md`](docs/current/active_learning.md) for the design.
 
 ## Label Studio integration concept
 
@@ -453,7 +451,7 @@ S3/MinIO frame path
 → W&B Artifact
 ```
 
-See [`docs/label_studio_setup.md`](docs/label_studio_setup.md).
+See [`docs/current/label_studio_setup.md`](docs/current/label_studio_setup.md).
 
 ## W&B usage concept
 

@@ -59,13 +59,19 @@ The review UI asks:
 
 ## Real deployment
 
-For production, store images in object storage and pass signed URLs or internal accessible paths to Label Studio.
+For production, store images in object storage and pass signed URLs or internal accessible paths to Label Studio. Label Studio owns the review UI state; the durable dataset source of truth should be the validated review sync into DuckLake.
 
 ```text
 S3/MinIO path
 → Label Studio task image URL
 → reviewer annotation
 → export JSON
+→ idempotent review sync
+→ DuckLake human_reviews snapshot
 → dataset builder
-→ W&B Artifact
+→ dataset manifest + W&B/MLflow Artifact
 ```
+
+The production sync step should merge by `event_id`, `annotation_id`,
+`review_batch_id`, `label_version`, and source so webhook retries or repeated
+exports do not duplicate labels.

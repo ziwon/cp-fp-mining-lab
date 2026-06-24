@@ -14,7 +14,11 @@ The lab today is **model-assisted curation**, not active learning:
 
 Active learning closes that loop: a live model scores unlabeled candidates, an
 acquisition function picks the most informative ones, humans label them, and the new
-labels trigger retraining and redeployment.
+labels trigger retraining and redeployment. In production, the acquisition queue,
+review outcomes, dataset manifests, and gate results should also be synced to
+DuckLake so every active-learning round can be replayed from a snapshot. See
+[`../future/production_plan.md`](../future/production_plan.md) for the full platform
+contract.
 
 ## Target loop
 
@@ -155,8 +159,11 @@ existing scripts.
   `acquisition_rank`, `cluster_id` — persisted alongside the clustering result.
 - **Review event**: webhook payload mapped to `event_id` + annotation, idempotent by
   `(event_id, annotation_id)`.
+- **Acquisition queue**: `event_id`, `review_batch_id`, `rank_score`,
+  `ranking_reason`, `priority`, and status, stored as a queryable production table.
 - **Model lineage**: each registered model records training dataset artifact version,
-  source query, config hash, and the review-export versions it consumed.
+  DuckLake snapshot ID, source query, config hash, and the review-export versions it
+  consumed.
 
 ## Minimal first step in this repo — implemented
 
@@ -190,3 +197,5 @@ pieces for managed ones:
   and submit retraining as an Argo Workflow / Kubernetes `Job` rather than in-process.
 - Add idempotency by `(event_id, annotation_id)` and a human approval gate on
   `staging → production`.
+- Sync active-learning decisions and review outcomes to DuckLake before dataset
+  build, then store the resulting snapshot ID in W&B/MLflow artifact metadata.
