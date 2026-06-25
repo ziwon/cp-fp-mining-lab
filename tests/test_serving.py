@@ -1,7 +1,8 @@
 import numpy as np
 
 from cv_fp_lab.detector import FpDetector
-from cv_fp_lab.serving import predict_tasks
+from cv_fp_lab.registry import LocalModelRegistry
+from cv_fp_lab.serving import model_status, predict_tasks
 
 
 def _detector():
@@ -29,3 +30,17 @@ def test_predict_tasks_returns_labelstudio_predictions() -> None:
 
 def test_predict_tasks_handles_empty() -> None:
     assert predict_tasks([], _detector()) == []
+
+
+def test_model_status_reports_missing_and_ready_model(tmp_path) -> None:
+    reg = LocalModelRegistry(tmp_path)
+
+    missing = model_status(reg)
+    assert missing["ready"] is False
+    assert missing["status"] == "NOT_READY"
+
+    reg.maybe_promote(_detector())
+    ready = model_status(reg)
+    assert ready["ready"] is True
+    assert ready["status"] == "UP"
+    assert ready["model_version"] == reg.production_version()

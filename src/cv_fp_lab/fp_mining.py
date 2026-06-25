@@ -26,7 +26,10 @@ def read_yolo_labels(label_path: str | Path) -> list[tuple[int, float, float, fl
         parts = line.split()
         if len(parts) >= 5:
             c, cx, cy, w, h = parts[:5]
-            rows.append((int(float(c)), float(cx), float(cy), float(w), float(h)))
+            try:
+                rows.append((int(float(c)), float(cx), float(cy), float(w), float(h)))
+            except ValueError:
+                continue
     return rows
 
 

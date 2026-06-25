@@ -12,6 +12,27 @@ def _default_embed(image_path: str) -> np.ndarray:
     return simple_image_embedding(image_path)
 
 
+def model_status(registry: Any, alias: str = "production") -> dict[str, Any]:
+    """Return whether an sklearn detector alias is ready to serve predictions."""
+    version = registry.stage_version(alias) or registry.production_version()
+    if version is None:
+        return {
+            "ready": False,
+            "status": "NOT_READY",
+            "model_version": None,
+            "error": f"No model alias/version {alias!r} is registered.",
+        }
+    model_path = registry.models_dir / version / "model.joblib"
+    if not model_path.exists():
+        return {
+            "ready": False,
+            "status": "NOT_READY",
+            "model_version": version,
+            "error": f"Registered version {version!r} has no model.joblib.",
+        }
+    return {"ready": True, "status": "UP", "model_version": version}
+
+
 def predict_tasks(
     tasks: list[dict[str, Any]],
     detector: FpDetector,

@@ -10,7 +10,11 @@ def test_iou_basic() -> None:
 
 def test_read_yolo_labels(tmp_path) -> None:
     p = tmp_path / "a.txt"
-    p.write_text("0 0.5 0.5 0.2 0.2\n1 0.1 0.1 0.05 0.05\n")
+    p.write_text(
+        "0 0.5 0.5 0.2 0.2\n"
+        "bad 0.1 0.1 0.05 0.05\n"
+        "1 0.1 0.1 0.05 0.05\n"
+    )
     rows = read_yolo_labels(p)
     assert rows == [(0, 0.5, 0.5, 0.2, 0.2), (1, 0.1, 0.1, 0.05, 0.05)]
     # missing / empty file -> negative image

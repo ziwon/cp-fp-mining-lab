@@ -100,8 +100,12 @@ def build_hard_negative_dataset(
     n_images = 0
     n_negatives = 0
     n_invalid_dropped = 0
+    n_missing_sources = 0
     used_stems: set[str] = set()
-    for src in sorted({s for s in df["source_image_path"].dropna() if Path(s).exists()}):
+    source_paths = sorted({s for s in df["source_image_path"].dropna()})
+    for missing in (s for s in source_paths if not Path(s).exists()):
+        n_missing_sources += 1
+    for src in (s for s in source_paths if Path(s).exists()):
         src = Path(src)
         out_stem = _unique_stem(src, used_stems)
         shutil.copy2(src, img_dir / f"{out_stem}{src.suffix}")
@@ -117,4 +121,5 @@ def build_hard_negative_dataset(
         "n_images": n_images,
         "n_negatives": n_negatives,
         "n_invalid_labels_dropped": n_invalid_dropped,
+        "n_missing_sources": n_missing_sources,
     }

@@ -32,6 +32,7 @@ def main() -> None:
     print(f"  source events: {events}")
     print(f"  images: {stats['n_images']} (negatives: {stats['n_negatives']})")
     print(f"  invalid labels dropped: {stats['n_invalid_labels_dropped']}")
+    print(f"  missing source images skipped: {stats['n_missing_sources']}")
     try:
         wandb_url = log_hard_negative_dataset_run(
             project=cfg["wandb"]["project"],

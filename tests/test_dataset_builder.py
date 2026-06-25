@@ -43,8 +43,14 @@ def test_build_hard_negatives(tmp_path) -> None:
                 str(src / "images" / "pos.jpg"),
                 str(src / "images" / "neg.jpg"),
                 str(src / "images" / "neg.jpg"),  # duplicate source -> one output
+                str(src / "images" / "missing.jpg"),
             ],
-            "operator_feedback": ["false_positive", "false_positive", "false_positive"],
+            "operator_feedback": [
+                "false_positive",
+                "false_positive",
+                "false_positive",
+                "false_positive",
+            ],
         }
     )
     out = tmp_path / "hardneg"
@@ -53,6 +59,7 @@ def test_build_hard_negatives(tmp_path) -> None:
     assert stats["n_images"] == 2  # deduped
     assert stats["n_negatives"] == 1  # the empty-label image
     assert stats["n_invalid_labels_dropped"] == 1  # class 9 dropped from pos
+    assert stats["n_missing_sources"] == 1
     assert (out / "images" / "pos.jpg").exists()
     # pos label keeps only the valid line; neg label is empty
     assert (out / "labels" / "pos.txt").read_text().strip() == "0 0.5 0.5 0.3 0.3"

@@ -20,7 +20,7 @@ from flask import Flask, jsonify, request
 
 from cv_fp_lab.config import load_config
 from cv_fp_lab.registry import LocalModelRegistry
-from cv_fp_lab.serving import predict_tasks
+from cv_fp_lab.serving import model_status, predict_tasks
 
 
 def create_app() -> Flask:
@@ -34,16 +34,19 @@ def create_app() -> Flask:
 
     @app.get("/health")
     def health():
-        version = registry.stage_version(alias) or registry.production_version()
-        return jsonify({"status": "UP", "model_version": version})
+        status = model_status(registry, alias)
+        return jsonify(status), 200 if status["ready"] else 503
 
     @app.post("/setup")
     def setup():
-        version = registry.stage_version(alias) or registry.production_version()
-        return jsonify({"model_version": version})
+        status = model_status(registry, alias)
+        return jsonify(status), 200 if status["ready"] else 503
 
     @app.post("/predict")
     def predict():
+        status = model_status(registry, alias)
+        if not status["ready"]:
+            return jsonify(status), 503
         payload = request.get_json(force=True) or {}
         tasks = payload.get("tasks", [])
         detector = _load()
