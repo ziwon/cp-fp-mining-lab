@@ -1,66 +1,106 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="860" viewBox="0 0 1400 860">
-  <rect width="1400" height="860" fill="#f8fafc"/>
-  <rect x="70" y="60" width="1260" height="740" rx="24" fill="#ffffff" stroke="#dbe4f0" stroke-width="2"/>
-  <text x="110" y="112" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#0f172a">DuckLake lineage model</text>
-  <text x="110" y="144" font-family="Arial, sans-serif" font-size="16" fill="#475569">Row-level tables connect source events to reviewed labels, dataset snapshots, and promotion decisions</text>
-
-  <rect x="120" y="210" width="210" height="116" rx="16" fill="#e0f2fe" stroke="#0284c7" stroke-width="2"/>
-  <text x="150" y="250" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#075985">events</text>
-  <text x="150" y="278" font-family="Arial, sans-serif" font-size="14" fill="#334155">event_id, camera, site</text>
-  <text x="150" y="302" font-family="Arial, sans-serif" font-size="14" fill="#334155">frame_uri, crop_uri</text>
-
-  <rect x="390" y="150" width="220" height="116" rx="16" fill="#dcfce7" stroke="#16a34a" stroke-width="2"/>
-  <text x="420" y="190" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#166534">detector_predictions</text>
-  <text x="420" y="218" font-family="Arial, sans-serif" font-size="14" fill="#334155">model_version</text>
-  <text x="420" y="242" font-family="Arial, sans-serif" font-size="14" fill="#334155">class, confidence, bbox</text>
-
-  <rect x="390" y="300" width="220" height="116" rx="16" fill="#fef3c7" stroke="#d97706" stroke-width="2"/>
-  <text x="420" y="340" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#92400e">embeddings</text>
-  <text x="420" y="368" font-family="Arial, sans-serif" font-size="14" fill="#334155">embedding_model</text>
-  <text x="420" y="392" font-family="Arial, sans-serif" font-size="14" fill="#334155">vector object URI</text>
-
-  <rect x="670" y="300" width="210" height="116" rx="16" fill="#f5e8ff" stroke="#9333ea" stroke-width="2"/>
-  <text x="700" y="340" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#6b21a8">clusters</text>
-  <text x="700" y="368" font-family="Arial, sans-serif" font-size="14" fill="#334155">cluster_id</text>
-  <text x="700" y="392" font-family="Arial, sans-serif" font-size="14" fill="#334155">representative score</text>
-
-  <rect x="670" y="150" width="210" height="116" rx="16" fill="#ffe4e6" stroke="#e11d48" stroke-width="2"/>
-  <text x="700" y="190" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#9f1239">acquisition_queue</text>
-  <text x="700" y="218" font-family="Arial, sans-serif" font-size="14" fill="#334155">review_batch_id</text>
-  <text x="700" y="242" font-family="Arial, sans-serif" font-size="14" fill="#334155">rank score, status</text>
-
-  <rect x="940" y="150" width="220" height="116" rx="16" fill="#ede9fe" stroke="#7c3aed" stroke-width="2"/>
-  <text x="970" y="190" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#5b21b6">human_reviews</text>
-  <text x="970" y="218" font-family="Arial, sans-serif" font-size="14" fill="#334155">annotation_id</text>
-  <text x="970" y="242" font-family="Arial, sans-serif" font-size="14" fill="#334155">fp_type, bbox_valid</text>
-
-  <rect x="940" y="300" width="220" height="116" rx="16" fill="#f1f5f9" stroke="#64748b" stroke-width="2"/>
-  <text x="970" y="340" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#334155">llm_prelabels</text>
-  <text x="970" y="368" font-family="Arial, sans-serif" font-size="14" fill="#334155">oracle_model</text>
-  <text x="970" y="392" font-family="Arial, sans-serif" font-size="14" fill="#334155">prompt, label, confidence</text>
-
-  <rect x="360" y="550" width="260" height="126" rx="18" fill="#ecfeff" stroke="#0891b2" stroke-width="2"/>
-  <text x="395" y="594" font-family="Arial, sans-serif" font-size="19" font-weight="700" fill="#0e7490">dataset_manifests</text>
-  <text x="395" y="624" font-family="Arial, sans-serif" font-size="14" fill="#334155">dataset_version, snapshot_id</text>
-  <text x="395" y="648" font-family="Arial, sans-serif" font-size="14" fill="#334155">train/eval split URIs</text>
-
-  <rect x="760" y="550" width="260" height="126" rx="18" fill="#fff7ed" stroke="#ea580c" stroke-width="2"/>
-  <text x="795" y="594" font-family="Arial, sans-serif" font-size="19" font-weight="700" fill="#9a3412">eval_gate_results</text>
-  <text x="795" y="624" font-family="Arial, sans-serif" font-size="14" fill="#334155">candidate model, metrics</text>
-  <text x="795" y="648" font-family="Arial, sans-serif" font-size="14" fill="#334155">promotion decision</text>
-
-  <line x1="330" y1="268" x2="390" y2="208" stroke="#64748b" stroke-width="3" marker-end="url(#arrow)"/>
-  <line x1="330" y1="268" x2="390" y2="358" stroke="#64748b" stroke-width="3" marker-end="url(#arrow)"/>
-  <line x1="610" y1="358" x2="670" y2="358" stroke="#64748b" stroke-width="3" marker-end="url(#arrow)"/>
-  <line x1="880" y1="208" x2="940" y2="208" stroke="#64748b" stroke-width="3" marker-end="url(#arrow)"/>
-  <line x1="880" y1="358" x2="940" y2="358" stroke="#64748b" stroke-width="3" marker-end="url(#arrow)"/>
-  <line x1="775" y1="300" x2="775" y2="266" stroke="#64748b" stroke-width="3" marker-end="url(#arrow)"/>
-  <line x1="1050" y1="266" x2="560" y2="550" stroke="#64748b" stroke-width="3" stroke-dasharray="7 7" marker-end="url(#arrow)"/>
-  <line x1="490" y1="676" x2="760" y2="613" stroke="#64748b" stroke-width="3" marker-end="url(#arrow)"/>
-
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="760" viewBox="0 0 1600 760" role="img" aria-label="DuckLake lineage model">
   <defs>
+    <style>
+      .bg { fill: #17172a; }
+      .group-title { font: 800 20px Inter, Arial, sans-serif; fill: #ffffff; }
+      .table-title { font: 800 16px Inter, Arial, sans-serif; fill: #ffffff; }
+      .table-text { font: 500 12.5px Inter, Arial, sans-serif; fill: #e8ebf8; opacity: 0.94; }
+      .card { stroke: rgba(255,255,255,0.58); stroke-width: 1.1; }
+      .arrow { stroke: #cfd4e8; stroke-width: 3; fill: none; }
+      .soft-arrow { stroke: #cfd4e8; stroke-width: 2.4; stroke-dasharray: 7 7; fill: none; opacity: 0.8; }
+    </style>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#151528"/>
+      <stop offset="0.5" stop-color="#1b1b32"/>
+      <stop offset="1" stop-color="#121522"/>
+    </linearGradient>
+    <linearGradient id="blueGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#22618a"/>
+      <stop offset="1" stop-color="#153d5d"/>
+    </linearGradient>
+    <linearGradient id="greenGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#246a57"/>
+      <stop offset="1" stop-color="#173f36"/>
+    </linearGradient>
+    <linearGradient id="orangeGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#8a5722"/>
+      <stop offset="1" stop-color="#5a3519"/>
+    </linearGradient>
+    <linearGradient id="pinkGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#7a2a6d"/>
+      <stop offset="1" stop-color="#4a1c49"/>
+    </linearGradient>
+    <linearGradient id="coreGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#4b3a8a"/>
+      <stop offset="1" stop-color="#2a2462"/>
+    </linearGradient>
+    <linearGradient id="grayGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#344052"/>
+      <stop offset="1" stop-color="#252c3a"/>
+    </linearGradient>
     <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
-      <path d="M0,0 L0,6 L8,3 z" fill="#64748b"/>
+      <path d="M0,0 L0,6 L8,3 z" fill="#cfd4e8"/>
     </marker>
   </defs>
+
+  <rect class="bg" width="1600" height="760" fill="url(#bgGrad)"/>
+  <circle cx="1455" cy="40" r="230" fill="#4b3a8a" opacity="0.13"/>
+  <circle cx="120" cy="760" r="260" fill="#22618a" opacity="0.12"/>
+
+  <rect x="70" y="55" width="1460" height="405" rx="26" fill="#102d3b" stroke="#84d7ee" stroke-width="1.5"/>
+  <text x="100" y="98" class="group-title">Event, prediction, embedding, and review tables</text>
+
+  <rect x="110" y="170" width="220" height="112" rx="16" fill="url(#blueGrad)" class="card"/>
+  <text x="138" y="207" class="table-title">events</text>
+  <text x="138" y="235" class="table-text">event_id, camera, site</text>
+  <text x="138" y="258" class="table-text">frame_uri, crop_uri</text>
+
+  <rect x="410" y="115" width="250" height="112" rx="16" fill="url(#greenGrad)" class="card"/>
+  <text x="438" y="152" class="table-title">detector_predictions</text>
+  <text x="438" y="180" class="table-text">model_version</text>
+  <text x="438" y="203" class="table-text">class, confidence, bbox</text>
+
+  <rect x="410" y="285" width="250" height="112" rx="16" fill="url(#orangeGrad)" class="card"/>
+  <text x="438" y="322" class="table-title">embeddings</text>
+  <text x="438" y="350" class="table-text">embedding_model</text>
+  <text x="438" y="373" class="table-text">vector object URI</text>
+
+  <rect x="740" y="285" width="230" height="112" rx="16" fill="url(#coreGrad)" class="card"/>
+  <text x="768" y="322" class="table-title">clusters</text>
+  <text x="768" y="350" class="table-text">cluster_id</text>
+  <text x="768" y="373" class="table-text">representative score</text>
+
+  <rect x="740" y="115" width="230" height="112" rx="16" fill="url(#pinkGrad)" class="card"/>
+  <text x="768" y="152" class="table-title">acquisition_queue</text>
+  <text x="768" y="180" class="table-text">review_batch_id</text>
+  <text x="768" y="203" class="table-text">rank score, status</text>
+
+  <rect x="1060" y="115" width="250" height="112" rx="16" fill="url(#pinkGrad)" class="card"/>
+  <text x="1088" y="152" class="table-title">human_reviews</text>
+  <text x="1088" y="180" class="table-text">annotation_id</text>
+  <text x="1088" y="203" class="table-text">fp_type, bbox_valid</text>
+
+  <rect x="1060" y="285" width="250" height="112" rx="16" fill="url(#grayGrad)" class="card"/>
+  <text x="1088" y="322" class="table-title">llm_prelabels</text>
+  <text x="1088" y="350" class="table-text">oracle_model</text>
+  <text x="1088" y="373" class="table-text">prompt, label, confidence</text>
+
+  <line x1="330" y1="226" x2="410" y2="171" class="arrow" marker-end="url(#arrow)"/>
+  <line x1="330" y1="226" x2="410" y2="341" class="arrow" marker-end="url(#arrow)"/>
+  <line x1="660" y1="341" x2="740" y2="341" class="arrow" marker-end="url(#arrow)"/>
+  <line x1="970" y1="171" x2="1060" y2="171" class="arrow" marker-end="url(#arrow)"/>
+  <line x1="970" y1="341" x2="1060" y2="341" class="soft-arrow" marker-end="url(#arrow)"/>
+  <line x1="855" y1="285" x2="855" y2="227" class="arrow" marker-end="url(#arrow)"/>
+
+  <rect x="250" y="540" width="1100" height="155" rx="26" fill="#211b42" stroke="#aa9df0" stroke-width="1.5"/>
+  <text x="285" y="585" class="group-title">Dataset and promotion lineage</text>
+
+  <rect x="360" y="620" width="310" height="56" rx="16" fill="url(#blueGrad)" class="card"/>
+  <text x="390" y="654" class="table-title">dataset_manifests</text>
+
+  <rect x="930" y="620" width="310" height="56" rx="16" fill="url(#orangeGrad)" class="card"/>
+  <text x="960" y="654" class="table-title">eval_gate_results</text>
+
+  <line x1="1185" y1="397" x2="655" y2="620" class="soft-arrow" marker-end="url(#arrow)"/>
+  <line x1="670" y1="648" x2="930" y2="648" class="arrow" marker-end="url(#arrow)"/>
 </svg>

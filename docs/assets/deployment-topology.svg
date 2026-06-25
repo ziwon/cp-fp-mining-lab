@@ -1,48 +1,95 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="920" viewBox="0 0 1400 920">
-  <rect width="1400" height="920" fill="#f8fafc"/>
-  <rect x="70" y="60" width="1260" height="800" rx="24" fill="#ffffff" stroke="#dce6f2" stroke-width="2"/>
-  <text x="110" y="112" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#111827">Deployment topology</text>
-  <text x="110" y="142" font-family="Arial, sans-serif" font-size="16" fill="#4b5563">Local lab → GPU server → on-prem Kubernetes → hybrid cloud</text>
-
-  <rect x="120" y="180" width="260" height="160" rx="18" fill="#e0f2fe" stroke="#0284c7" stroke-width="2"/>
-  <text x="150" y="220" font-family="Arial, sans-serif" font-size="20" font-weight="700" fill="#075985">Local Lab</text>
-  <text x="150" y="250" font-family="Arial, sans-serif" font-size="14" fill="#334155">Docker Compose</text>
-  <text x="150" y="276" font-family="Arial, sans-serif" font-size="14" fill="#334155">MinIO, Label Studio, W&amp;B</text>
-  <text x="150" y="302" font-family="Arial, sans-serif" font-size="14" fill="#334155">Synthetic and real-data paths</text>
-
-  <rect x="430" y="180" width="260" height="160" rx="18" fill="#dcfce7" stroke="#16a34a" stroke-width="2"/>
-  <text x="460" y="220" font-family="Arial, sans-serif" font-size="20" font-weight="700" fill="#166534">Single GPU Server</text>
-  <text x="460" y="250" font-family="Arial, sans-serif" font-size="14" fill="#334155">GPU embedding jobs</text>
-  <text x="460" y="276" font-family="Arial, sans-serif" font-size="14" fill="#334155">Host storage or MinIO</text>
-  <text x="460" y="302" font-family="Arial, sans-serif" font-size="14" fill="#334155">Manual review loop</text>
-
-  <rect x="740" y="180" width="260" height="160" rx="18" fill="#fef3c7" stroke="#d97706" stroke-width="2"/>
-  <text x="770" y="220" font-family="Arial, sans-serif" font-size="20" font-weight="700" fill="#92400e">On-Prem Kubernetes</text>
-  <text x="770" y="250" font-family="Arial, sans-serif" font-size="14" fill="#334155">Argo Workflows</text>
-  <text x="770" y="276" font-family="Arial, sans-serif" font-size="14" fill="#334155">DuckLake + PostgreSQL</text>
-  <text x="770" y="302" font-family="Arial, sans-serif" font-size="14" fill="#334155">GPU/CPU node pools</text>
-
-  <rect x="1050" y="180" width="220" height="160" rx="18" fill="#f5e8ff" stroke="#9333ea" stroke-width="2"/>
-  <text x="1078" y="220" font-family="Arial, sans-serif" font-size="20" font-weight="700" fill="#6b21a8">Hybrid Cloud</text>
-  <text x="1078" y="250" font-family="Arial, sans-serif" font-size="14" fill="#334155">Managed object storage</text>
-  <text x="1078" y="276" font-family="Arial, sans-serif" font-size="14" fill="#334155">W&amp;B / MLflow</text>
-  <text x="1078" y="302" font-family="Arial, sans-serif" font-size="14" fill="#334155">Observability + backups</text>
-
-  <line x1="380" y1="260" x2="430" y2="260" stroke="#64748b" stroke-width="3" marker-end="url(#arrow)"/>
-  <line x1="690" y1="260" x2="740" y2="260" stroke="#64748b" stroke-width="3" marker-end="url(#arrow)"/>
-  <line x1="1000" y1="260" x2="1050" y2="260" stroke="#64748b" stroke-width="3" marker-end="url(#arrow)"/>
-
-  <rect x="220" y="420" width="960" height="320" rx="20" fill="#f8fafc" stroke="#cbd5e1" stroke-width="2"/>
-  <text x="250" y="470" font-family="Arial, sans-serif" font-size="20" font-weight="700" fill="#0f172a">Cross-cutting platform services</text>
-  <text x="250" y="510" font-family="Arial, sans-serif" font-size="15" fill="#334155">• API gateway / ingest endpoint for production events</text>
-  <text x="250" y="540" font-family="Arial, sans-serif" font-size="15" fill="#334155">• Review webhooks and task sync into the lakehouse</text>
-  <text x="250" y="570" font-family="Arial, sans-serif" font-size="15" fill="#334155">• Secret management, RBAC, and private networking</text>
-  <text x="250" y="600" font-family="Arial, sans-serif" font-size="15" fill="#334155">• Retention, backup, and data freshness workflows</text>
-  <text x="250" y="630" font-family="Arial, sans-serif" font-size="15" fill="#334155">• Dataset manifests and model promotion lifecycle</text>
-
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="700" viewBox="0 0 1600 700" role="img" aria-label="Hybrid deployment topology">
   <defs>
+    <style>
+      .bg { fill: #17172a; }
+      .section-title { font: 800 20px Inter, Arial, sans-serif; fill: #ffffff; }
+      .card-title { font: 800 17px Inter, Arial, sans-serif; fill: #ffffff; }
+      .card-text { font: 500 12.5px Inter, Arial, sans-serif; fill: #e8ebf8; opacity: 0.94; }
+      .note { font: 600 14px Inter, Arial, sans-serif; fill: #d5daf0; }
+      .card { stroke: rgba(255,255,255,0.58); stroke-width: 1.1; }
+      .arrow { stroke: #cfd4e8; stroke-width: 3; fill: none; }
+    </style>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#151528"/>
+      <stop offset="0.5" stop-color="#1b1b32"/>
+      <stop offset="1" stop-color="#121522"/>
+    </linearGradient>
+    <linearGradient id="blueGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#22618a"/>
+      <stop offset="1" stop-color="#153d5d"/>
+    </linearGradient>
+    <linearGradient id="greenGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#246a57"/>
+      <stop offset="1" stop-color="#173f36"/>
+    </linearGradient>
+    <linearGradient id="orangeGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#8a5722"/>
+      <stop offset="1" stop-color="#5a3519"/>
+    </linearGradient>
+    <linearGradient id="pinkGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#7a2a6d"/>
+      <stop offset="1" stop-color="#4a1c49"/>
+    </linearGradient>
+    <linearGradient id="grayGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#344052"/>
+      <stop offset="1" stop-color="#252c3a"/>
+    </linearGradient>
     <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
-      <path d="M0,0 L0,6 L8,3 z" fill="#64748b"/>
+      <path d="M0,0 L0,6 L8,3 z" fill="#cfd4e8"/>
     </marker>
   </defs>
+
+  <rect class="bg" width="1600" height="700" fill="url(#bgGrad)"/>
+  <circle cx="1455" cy="45" r="230" fill="#4b3a8a" opacity="0.13"/>
+  <circle cx="120" cy="700" r="260" fill="#22618a" opacity="0.12"/>
+
+  <rect x="70" y="70" width="1460" height="245" rx="26" fill="#102d3b" stroke="#84d7ee" stroke-width="1.5"/>
+  <text x="100" y="113" class="section-title">Deployment progression</text>
+
+  <rect x="115" y="150" width="270" height="110" rx="18" fill="url(#blueGrad)" class="card"/>
+  <text x="145" y="186" class="card-title">Local lab</text>
+  <text x="145" y="215" class="card-text">Docker Compose</text>
+  <text x="145" y="238" class="card-text">Synthetic and real-data paths</text>
+
+  <rect x="455" y="150" width="270" height="110" rx="18" fill="url(#greenGrad)" class="card"/>
+  <text x="485" y="186" class="card-title">Single GPU server</text>
+  <text x="485" y="215" class="card-text">GPU embedding jobs</text>
+  <text x="485" y="238" class="card-text">Host storage or MinIO</text>
+
+  <rect x="795" y="150" width="270" height="110" rx="18" fill="url(#orangeGrad)" class="card"/>
+  <text x="825" y="186" class="card-title">On-prem Kubernetes</text>
+  <text x="825" y="215" class="card-text">Argo Workflows</text>
+  <text x="825" y="238" class="card-text">DuckLake + PostgreSQL</text>
+
+  <rect x="1135" y="150" width="270" height="110" rx="18" fill="url(#pinkGrad)" class="card"/>
+  <text x="1165" y="186" class="card-title">Hybrid cloud</text>
+  <text x="1165" y="215" class="card-text">Approved artifact sync</text>
+  <text x="1165" y="238" class="card-text">Managed lifecycle surfaces</text>
+
+  <line x1="385" y1="205" x2="455" y2="205" class="arrow" marker-end="url(#arrow)"/>
+  <line x1="725" y1="205" x2="795" y2="205" class="arrow" marker-end="url(#arrow)"/>
+  <line x1="1065" y1="205" x2="1135" y2="205" class="arrow" marker-end="url(#arrow)"/>
+
+  <rect x="180" y="375" width="1240" height="235" rx="26" fill="#211b42" stroke="#aa9df0" stroke-width="1.5"/>
+  <text x="215" y="420" class="section-title">Cross-cutting platform services</text>
+
+  <rect x="230" y="455" width="320" height="48" rx="14" fill="url(#grayGrad)" class="card"/>
+  <text x="255" y="486" class="card-title">API gateway and event ingest</text>
+
+  <rect x="640" y="455" width="320" height="48" rx="14" fill="url(#grayGrad)" class="card"/>
+  <text x="665" y="486" class="card-title">Review webhook sync</text>
+
+  <rect x="1050" y="455" width="320" height="48" rx="14" fill="url(#grayGrad)" class="card"/>
+  <text x="1075" y="486" class="card-title">Dataset and model lifecycle</text>
+
+  <rect x="230" y="535" width="320" height="48" rx="14" fill="url(#grayGrad)" class="card"/>
+  <text x="255" y="566" class="card-title">Secrets, RBAC, networking</text>
+
+  <rect x="640" y="535" width="320" height="48" rx="14" fill="url(#grayGrad)" class="card"/>
+  <text x="665" y="566" class="card-title">Retention and backup</text>
+
+  <rect x="1050" y="535" width="320" height="48" rx="14" fill="url(#grayGrad)" class="card"/>
+  <text x="1075" y="566" class="card-title">VictoriaMetrics, logs, traces</text>
+
+  <text x="230" y="660" class="note">Raw frames stay on-premises unless policy explicitly allows replication; curated metadata and approved artifacts can move across environments.</text>
 </svg>

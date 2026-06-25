@@ -132,7 +132,7 @@ W&B/MLflow registry controls.
 
 ![Future production architecture](docs/assets/architecture-overview.svg)
 
-Full production design: [`docs/future/production_plan.md`](docs/future/production_plan.md).
+Full production design: [`docs/future/`](docs/future/).
 
 ## Repository Map
 
@@ -156,7 +156,7 @@ tests/                   unit tests for pipeline and service logic
 - Real-data loop: [`docs/current/real_data.md`](docs/current/real_data.md)
 - Label Studio setup: [`docs/current/label_studio_setup.md`](docs/current/label_studio_setup.md)
 - FP taxonomy: [`docs/reference/fp_taxonomy.md`](docs/reference/fp_taxonomy.md)
-- Production plan: [`docs/future/production_plan.md`](docs/future/production_plan.md)
+- Production plan: [`docs/future/`](docs/future/)
 
 ## Development Notes
 

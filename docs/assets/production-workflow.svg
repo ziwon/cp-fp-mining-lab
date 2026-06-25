@@ -1,54 +1,105 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="900" viewBox="0 0 1400 900">
-  <rect width="1400" height="900" fill="#f8fafc"/>
-  <rect x="70" y="60" width="1260" height="780" rx="24" fill="#ffffff" stroke="#dbe4f0" stroke-width="2"/>
-  <text x="110" y="112" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#0f172a">Production false-positive mining workflow</text>
-
-  <rect x="120" y="180" width="220" height="110" rx="16" fill="#e0f2fe" stroke="#0284c7" stroke-width="2"/>
-  <text x="155" y="220" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#075985">1. Mine candidates</text>
-  <text x="155" y="248" font-family="Arial, sans-serif" font-size="14" fill="#334155">Event query + FP/FN signals</text>
-
-  <rect x="380" y="180" width="220" height="110" rx="16" fill="#dcfce7" stroke="#16a34a" stroke-width="2"/>
-  <text x="415" y="220" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#166534">2. Resolve assets</text>
-  <text x="415" y="248" font-family="Arial, sans-serif" font-size="14" fill="#334155">Frames, crops, object URIs</text>
-
-  <rect x="640" y="180" width="220" height="110" rx="16" fill="#fef3c7" stroke="#d97706" stroke-width="2"/>
-  <text x="675" y="220" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#92400e">3. Embed + cluster</text>
-  <text x="675" y="248" font-family="Arial, sans-serif" font-size="14" fill="#334155">Embeddings, UMAP, HDBSCAN</text>
-
-  <rect x="900" y="180" width="220" height="110" rx="16" fill="#f5e8ff" stroke="#9333ea" stroke-width="2"/>
-  <text x="935" y="220" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#6b21a8">4. Rank for review</text>
-  <text x="935" y="248" font-family="Arial, sans-serif" font-size="14" fill="#334155">Uncertainty + diversity + recurrence</text>
-
-  <line x1="340" y1="235" x2="380" y2="235" stroke="#64748b" stroke-width="3" marker-end="url(#arrow)"/>
-  <line x1="600" y1="235" x2="640" y2="235" stroke="#64748b" stroke-width="3" marker-end="url(#arrow)"/>
-  <line x1="860" y1="235" x2="900" y2="235" stroke="#64748b" stroke-width="3" marker-end="url(#arrow)"/>
-
-  <rect x="300" y="360" width="220" height="120" rx="16" fill="#ffe4e6" stroke="#e11d48" stroke-width="2"/>
-  <text x="335" y="400" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#9f1239">5. Human review</text>
-  <text x="335" y="428" font-family="Arial, sans-serif" font-size="14" fill="#334155">Label Studio + pre-labels</text>
-
-  <rect x="560" y="360" width="220" height="120" rx="16" fill="#e2e8f0" stroke="#475569" stroke-width="2"/>
-  <text x="595" y="400" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#334155">6. Sync lineage</text>
-  <text x="595" y="428" font-family="Arial, sans-serif" font-size="14" fill="#334155">DuckLake + PostgreSQL</text>
-
-  <rect x="820" y="360" width="220" height="120" rx="16" fill="#ede9fe" stroke="#7c3aed" stroke-width="2"/>
-  <text x="855" y="400" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#5b21b6">7. Train + gate</text>
-  <text x="855" y="428" font-family="Arial, sans-serif" font-size="14" fill="#334155">Dataset build, eval, promote</text>
-
-  <line x1="500" y1="420" x2="560" y2="420" stroke="#64748b" stroke-width="3" marker-end="url(#arrow)"/>
-  <line x1="780" y1="420" x2="820" y2="420" stroke="#64748b" stroke-width="3" marker-end="url(#arrow)"/>
-  <line x1="1010" y1="290" x2="1010" y2="360" stroke="#64748b" stroke-width="3" marker-end="url(#arrow)"/>
-
-  <rect x="240" y="540" width="920" height="220" rx="18" fill="#f8fafc" stroke="#cbd5e1" stroke-width="2"/>
-  <text x="270" y="580" font-family="Arial, sans-serif" font-size="21" font-weight="700" fill="#0f172a">Operational controls</text>
-  <text x="270" y="616" font-family="Arial, sans-serif" font-size="15" fill="#334155">• Idempotent review sync and batch registration</text>
-  <text x="270" y="642" font-family="Arial, sans-serif" font-size="15" fill="#334155">• Immutable dataset manifests tied to DuckLake snapshots</text>
-  <text x="270" y="668" font-family="Arial, sans-serif" font-size="15" fill="#334155">• W&amp;B or MLflow tracking for artifacts, metrics, and promotion state</text>
-  <text x="270" y="694" font-family="Arial, sans-serif" font-size="15" fill="#334155">• Observability, backup, RBAC, retention, and secret handling</text>
-
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="720" viewBox="0 0 1600 720" role="img" aria-label="Production false-positive mining workflow">
   <defs>
+    <style>
+      .bg { fill: #17172a; }
+      .section-title { font: 800 20px Inter, Arial, sans-serif; fill: #ffffff; }
+      .card-title { font: 800 16px Inter, Arial, sans-serif; fill: #ffffff; }
+      .card-text { font: 500 12.5px Inter, Arial, sans-serif; fill: #e8ebf8; opacity: 0.94; }
+      .note { font: 600 14px Inter, Arial, sans-serif; fill: #d5daf0; }
+      .card { stroke: rgba(255,255,255,0.58); stroke-width: 1.1; }
+      .arrow { stroke: #cfd4e8; stroke-width: 3; fill: none; }
+    </style>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#151528"/>
+      <stop offset="0.5" stop-color="#1b1b32"/>
+      <stop offset="1" stop-color="#121522"/>
+    </linearGradient>
+    <linearGradient id="blueGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#22618a"/>
+      <stop offset="1" stop-color="#153d5d"/>
+    </linearGradient>
+    <linearGradient id="greenGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#246a57"/>
+      <stop offset="1" stop-color="#173f36"/>
+    </linearGradient>
+    <linearGradient id="orangeGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#8a5722"/>
+      <stop offset="1" stop-color="#5a3519"/>
+    </linearGradient>
+    <linearGradient id="pinkGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#7a2a6d"/>
+      <stop offset="1" stop-color="#4a1c49"/>
+    </linearGradient>
+    <linearGradient id="coreGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#4b3a8a"/>
+      <stop offset="1" stop-color="#2a2462"/>
+    </linearGradient>
+    <linearGradient id="grayGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#344052"/>
+      <stop offset="1" stop-color="#252c3a"/>
+    </linearGradient>
     <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
-      <path d="M0,0 L0,6 L8,3 z" fill="#64748b"/>
+      <path d="M0,0 L0,6 L8,3 z" fill="#cfd4e8"/>
     </marker>
   </defs>
+
+  <rect class="bg" width="1600" height="720" fill="url(#bgGrad)"/>
+  <circle cx="1455" cy="45" r="230" fill="#4b3a8a" opacity="0.13"/>
+  <circle cx="120" cy="720" r="260" fill="#22618a" opacity="0.12"/>
+
+  <rect x="70" y="70" width="1460" height="250" rx="26" fill="#14251f" stroke="#81c9b0" stroke-width="1.5"/>
+  <text x="100" y="112" class="section-title">Mining, ranking, and review</text>
+
+  <rect x="100" y="155" width="230" height="104" rx="18" fill="url(#blueGrad)" class="card"/>
+  <text x="126" y="190" class="card-title">1. Mine candidates</text>
+  <text x="126" y="217" class="card-text">Event query</text>
+  <text x="126" y="239" class="card-text">FP/FN and drift signals</text>
+
+  <rect x="382" y="155" width="230" height="104" rx="18" fill="url(#greenGrad)" class="card"/>
+  <text x="408" y="190" class="card-title">2. Resolve assets</text>
+  <text x="408" y="217" class="card-text">Frames and crops</text>
+  <text x="408" y="239" class="card-text">Stable object URIs</text>
+
+  <rect x="664" y="155" width="230" height="104" rx="18" fill="url(#orangeGrad)" class="card"/>
+  <text x="690" y="190" class="card-title">3. Embed + cluster</text>
+  <text x="690" y="217" class="card-text">Embedding shards</text>
+  <text x="690" y="239" class="card-text">UMAP + HDBSCAN/fallbacks</text>
+
+  <rect x="946" y="155" width="230" height="104" rx="18" fill="url(#pinkGrad)" class="card"/>
+  <text x="972" y="190" class="card-title">4. Rank for review</text>
+  <text x="972" y="217" class="card-text">Uncertainty + diversity</text>
+  <text x="972" y="239" class="card-text">Recurrence and priority</text>
+
+  <rect x="1228" y="155" width="240" height="104" rx="18" fill="url(#coreGrad)" class="card"/>
+  <text x="1254" y="190" class="card-title">5. Human review</text>
+  <text x="1254" y="217" class="card-text">Label Studio tasks</text>
+  <text x="1254" y="239" class="card-text">Pre-labels and decisions</text>
+
+  <line x1="330" y1="207" x2="382" y2="207" class="arrow" marker-end="url(#arrow)"/>
+  <line x1="612" y1="207" x2="664" y2="207" class="arrow" marker-end="url(#arrow)"/>
+  <line x1="894" y1="207" x2="946" y2="207" class="arrow" marker-end="url(#arrow)"/>
+  <line x1="1176" y1="207" x2="1228" y2="207" class="arrow" marker-end="url(#arrow)"/>
+
+  <rect x="70" y="365" width="1460" height="160" rx="26" fill="#211b42" stroke="#aa9df0" stroke-width="1.5"/>
+  <text x="100" y="407" class="section-title">Dataset, training, and promotion</text>
+
+  <rect x="170" y="435" width="280" height="64" rx="16" fill="url(#blueGrad)" class="card"/>
+  <text x="198" y="474" class="card-title">Review sync into DuckLake</text>
+
+  <rect x="525" y="435" width="280" height="64" rx="16" fill="url(#greenGrad)" class="card"/>
+  <text x="553" y="474" class="card-title">Dataset manifest build</text>
+
+  <rect x="880" y="435" width="280" height="64" rx="16" fill="url(#orangeGrad)" class="card"/>
+  <text x="908" y="474" class="card-title">Training + evaluation gate</text>
+
+  <rect x="1235" y="435" width="220" height="64" rx="16" fill="url(#pinkGrad)" class="card"/>
+  <text x="1263" y="474" class="card-title">Registry promotion</text>
+
+  <line x1="450" y1="467" x2="525" y2="467" class="arrow" marker-end="url(#arrow)"/>
+  <line x1="805" y1="467" x2="880" y2="467" class="arrow" marker-end="url(#arrow)"/>
+  <line x1="1160" y1="467" x2="1235" y2="467" class="arrow" marker-end="url(#arrow)"/>
+  <line x1="1348" y1="259" x2="1348" y2="435" class="arrow" marker-end="url(#arrow)"/>
+
+  <rect x="180" y="585" width="1240" height="78" rx="20" fill="#202634" stroke="#606a84" stroke-width="1.2"/>
+  <text x="215" y="631" class="note">Operational controls: idempotent review sync - immutable manifests - snapshot lineage - artifact tracking - observability - backup - RBAC - retention</text>
 </svg>

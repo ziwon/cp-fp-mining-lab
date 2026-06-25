@@ -17,7 +17,7 @@ acquisition function picks the most informative ones, humans label them, and the
 labels trigger retraining and redeployment. In production, the acquisition queue,
 review outcomes, dataset manifests, and gate results should also be synced to
 DuckLake so every active-learning round can be replayed from a snapshot. See
-[`../future/production_plan.md`](../future/production_plan.md) for the full platform
+[`../future/`](../future/) for the full platform
 contract.
 
 ## Target loop

@@ -7,7 +7,7 @@ Build a data-centric feedback loop for production computer vision systems that s
 This document is the compact architecture map for the lab. For the consolidated
 future production plan with Argo Workflows, DuckLake, PostgreSQL-backed metadata,
 hybrid deployment, LLM/VLM pre-labeling, and operations controls, see
-[`../future/production_plan.md`](../future/production_plan.md).
+[`../future/`](../future/).
 
 ## Pipeline
 
@@ -115,7 +115,7 @@ Recommended production progression:
 5. **Managed platform**: managed object storage, managed PostgreSQL, cloud secrets, observability, and model/data registry.
 
 For the consolidated Argo/DuckLake production platform plan, see
-[`../future/production_plan.md`](../future/production_plan.md).
+[`../future/`](../future/).
 
 ## Production extension points
 

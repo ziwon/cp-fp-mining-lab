@@ -20,7 +20,7 @@ The docs are organized by repo status:
 ## Future Production Design
 
 - Production plan:
-  [`future/production_plan.md`](future/production_plan.md)
+  [`future/`](future/)
 
 ## Reference
 
@@ -39,4 +39,4 @@ The docs are organized by repo status:
 - Production migration:
   [`current/architecture.md`](current/architecture.md) ->
   [`current/active_learning.md`](current/active_learning.md) ->
-  [`future/production_plan.md`](future/production_plan.md)
+  [`future/`](future/)
