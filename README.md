@@ -1,278 +1,102 @@
 # CV False Positive Mining Lab
 
-A small, practical lab repository for experimenting with a computer-vision false-positive improvement loop:
+A lightweight lab for turning computer-vision false positives into reviewed,
+versioned hard-negative datasets and retraining signals.
+
+The repository stays runnable offline by default. The synthetic path needs no
+real footage, GPU, Label Studio account, or cloud service. The real-data path
+uses D-Fire + YOLO to mine actual detector false positives and feeds them through
+the same review, lineage, and gate-promote loop.
 
 ```text
-Production FP events
-→ frame/crop collection
-→ embedding extraction
-→ UMAP/HDBSCAN clustering
-→ human review / Label Studio export
-→ YOLO/COCO-style dataset build
-→ W&B Artifacts + Tables logging
-→ retraining/evaluation handoff
+production or synthetic FP events
+-> frame/crop collection
+-> embedding extraction
+-> UMAP/HDBSCAN clustering with fallbacks
+-> uncertainty + diversity ranking
+-> Label Studio review
+-> hard-negative dataset build
+-> W&B Tables/Artifacts and local registry lineage
+-> retraining, evaluation, and promotion gate
 ```
 
-This repository is intentionally lightweight. It uses a synthetic sample dataset so the pipeline can run without real CCTV footage.
+## What Works Today
 
-## Why this exists
+- **Synthetic smoke test**: scripts `00` through `06` generate fake FP crops,
+  cluster them, export/import Label Studio tasks, log to W&B, and train the local
+  sklearn `FpDetector`.
+- **Local active-learning loop**: Docker Compose can run Label Studio, a Flask ML
+  backend, a retrain webhook, a fileserver, MinIO, and self-hosted W&B.
+- **Real-data YOLO track**: scripts `10` through `15` prepare D-Fire, train YOLO,
+  mine real false positives, build reviewed hard negatives, retrain, and evaluate
+  through a detection-aware promotion gate.
+- **Production plan**: the future target is Argo Workflows, object storage,
+  DuckLake + PostgreSQL lineage, Label Studio review sync, and W&B/MLflow registry
+  controls.
 
-In production CV systems, false positives are not just failures. They are high-value signals showing where the model confuses real-world edge cases:
+## Quick Start
 
-- smoke vs steam/fog/dust
-- fire vs reflection/headlight/welding/sunset
-- falldown vs sitting/crouching/shadow
-- intrusion vs animal/tree motion/authorized worker
-
-This lab demonstrates how to group those false positives, review them, and convert repeated patterns into hard-negative datasets.
-
-## Architecture
-
-The full data-centric feedback loop, from production inference to model registry:
-
-```mermaid
-%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
-flowchart TD
-    A["<b>Production Inference</b><br/>event_id, camera_id, timestamp,<br/>bbox, class, confidence, model_version"]
-    B["<b>FP/FN Candidate Mining</b><br/>false positive, false negative, low confidence,<br/>temporal flicker, new camera/site"]
-    C["<b>Frame + Crop Store</b><br/>full_frame.jpg, bbox_crop.jpg,<br/>short_clip.mp4, metadata.json"]
-    D["<b>Embedding + Clustering</b><br/>CLIP/DINOv2/simple embeddings<br/>→ UMAP → HDBSCAN/K-Means"]
-    E["<b>Human Review</b><br/>Label Studio: event validity,<br/>fp_type, bbox_valid, comment"]
-    F["<b>Dataset Builder</b><br/>Label Studio JSON<br/>→ COCO/YOLO hard-negative dataset"]
-    G["<b>W&amp;B</b><br/>Artifacts: dataset versions<br/>Tables: FP/FN visual comparison<br/>Runs: training/evaluation metrics<br/>Registry: candidate/staging/production model"]
-
-    A --> B --> C --> D --> E --> F --> G
-
-    classDef input fill:#232323,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
-    classDef mining fill:#3b2f20,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
-    classDef analysis fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
-    classDef review fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
-    classDef dataset fill:#173f32,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
-    classDef render fill:#5a3520,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
-    class A input;
-    class B,C mining;
-    class D analysis;
-    class E review;
-    class F dataset;
-    class G render;
-```
-
-### GPU server deployment
-
-The first deployable shape is a single dedicated GPU server running Docker Compose:
-
-```mermaid
-%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
-flowchart TD
-    subgraph GPU["GPU Server — Docker Compose"]
-        miner["<b>miner</b><br/>Python worker image<br/>embedding extraction, clustering,<br/>dataset export/import, W&amp;B logging<br/>/app/data mounted from host storage<br/>optional NVIDIA GPU for CLIP/DINOv2"]
-        minio["<b>MinIO</b><br/>S3-compatible frame/crop/object store<br/>local stand-in for cloud object storage"]
-        ls["<b>Label Studio</b><br/>review UI for event validity,<br/>fp_type, bbox quality, comments"]
-        wandb["<b>W&amp;B</b><br/>offline local run directory by default<br/>online project/artifact store in production"]
-    end
-
-    miner --> minio
-    miner --> ls
-    miner --> wandb
-
-    classDef worker fill:#1b070a,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
-    classDef store fill:#173f32,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
-    classDef review fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
-    classDef render fill:#5a3520,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
-    class miner worker;
-    class minio store;
-    class ls review;
-    class wandb render;
-    style GPU fill:#171717,stroke:#d0d0d0,color:#f5f5f5;
-```
-
-This keeps the mining logic stateless: the worker reads config, event metadata, and object paths; writes versioned outputs; and exits. Long-lived state belongs in object storage, Label Studio, W&B, or an external metadata database.
-
-### Active learning loop (extension)
-
-The current lab uses model **pre-annotations** (each task carries the detector's `pred_class`/`pred_confidence`) and **clustering** to select what humans review. It is not yet a closed active-learning loop. The diagram below shows how to close it: add a Label Studio **ML backend** that serves the live detector, rank unlabeled tasks by **uncertainty** (not just cluster membership), and trigger retraining via **webhooks** once a review batch lands.
-
-```mermaid
-%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
-flowchart LR
-    subgraph LS["Label Studio"]
-        tasks["Unlabeled tasks<br/>(candidate FP/FN crops)"]
-        review["Human review<br/>event validity, fp_type, bbox"]
-    end
-
-    mlb["<b>ML Backend</b><br/>serves current detector<br/>pre-labels + confidence/uncertainty"]
-    rank["<b>Acquisition / ranking</b><br/>uncertainty, margin, entropy<br/>+ cluster diversity"]
-    builder["<b>Dataset Builder</b><br/>YOLO/COCO hard negatives"]
-    train["<b>Training + Eval</b><br/>retrain → regression eval"]
-    reg["<b>W&amp;B Registry</b><br/>candidate → staging → production"]
-
-    mlb -->|predictions| tasks
-    tasks --> rank --> review
-    review -->|webhook: annotation created| builder
-    builder --> train --> reg
-    reg -->|promote model| mlb
-
-    classDef serving fill:#1b070a,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
-    classDef analysis fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
-    classDef review fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
-    classDef dataset fill:#173f32,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
-    classDef render fill:#5a3520,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
-    class mlb serving;
-    class rank analysis;
-    class tasks,review review;
-    class builder,train dataset;
-    class reg render;
-    style LS fill:#171717,stroke:#d0d0d0,color:#f5f5f5;
-```
-
-Key changes versus today's flow:
-
-- **Selection by uncertainty, not only clusters.** Rank tasks with an acquisition function (least-confidence, margin, entropy) and keep clustering for diversity/dedup, so reviewers see informative *and* representative samples.
-- **Live model in the loop.** A Label Studio ML backend serves the current detector for in-UI predictions; promoting a new model in the W&B Registry swaps the backend.
-- **Event-driven retraining.** Label Studio `ANNOTATION_CREATED`/project webhooks trigger the dataset builder and a retrain → regression-eval → registry-promotion cycle.
-
-See [`docs/current/active_learning.md`](docs/current/active_learning.md) for the full design.
-
-For the compact lab architecture, see
-[`docs/current/architecture.md`](docs/current/architecture.md). For the future
-Argo/DuckLake production plan, hybrid deployment target, and optional LLM/VLM
-pre-labeling roadmap, see
-[`docs/future/production_plan.md`](docs/future/production_plan.md).
-
-## Repository layout
-
-```text
-cv-fp-mining-lab/
-├── configs/
-│   └── pipeline.yaml
-├── data/
-│   ├── raw/                  # generated sample frames/crops
-│   ├── processed/            # embeddings, clusters, datasets
-│   └── labelstudio_exports/  # sample Label Studio export JSON
-├── docs/
-│   ├── README.md
-│   ├── current/
-│   │   ├── active_learning.md
-│   │   ├── architecture.md
-│   │   ├── demo_walkthrough.md
-│   │   ├── label_studio_setup.md
-│   │   └── real_data.md
-│   ├── future/
-│   │   └── production_plan.md
-│   ├── reference/
-│   │   └── fp_taxonomy.md
-├── notebooks/
-│   └── 01_fp_clustering.ipynb
-├── scripts/
-│   ├── 00_generate_sample_data.py
-│   ├── 01_extract_embeddings.py
-│   ├── 02_cluster_false_positives.py
-│   ├── 03_export_for_label_studio.py
-│   ├── 04_import_label_studio_export.py
-│   ├── 05_log_to_wandb.py
-│   └── 06_train_detector.py
-├── services/
-│   ├── ml_backend.py          # Label Studio ML backend (Phase 2)
-│   └── webhook.py             # retrain-trigger receiver (Phase 3)
-└── src/cv_fp_lab/
-    ├── config.py
-    ├── dataset.py
-    ├── embeddings.py
-    ├── clustering.py
-    ├── labelstudio.py
-    ├── active_learning.py
-    ├── detector.py            # fp_type classifier over embeddings
-    ├── registry.py            # local model registry + promotion gate
-    ├── training.py            # label assembly + retrain/register
-    ├── serving.py             # tasks -> ML-backend predictions
-    ├── feedback.py            # webhook parsing + batching
-    ├── wandb_logging.py
-    └── utils.py
-```
-
-## Quick start
-
-For the full local active-learning loop (Label Studio review → webhook retrain →
-gate → W&B), follow [`docs/current/demo_walkthrough.md`](docs/current/demo_walkthrough.md).
-
-### Demo screenshots
-
-**Human review in Label Studio.** Uncertainty-ranked false-positive crops loaded as
-tasks, with the synthetic FP image, model metadata (`event_id`, `camera_id`,
-`pred_class`), and the reviewer's verdict. Images are served over HTTP by the
-`fileserver` container so they render directly in the UI.
-
-![Label Studio review queue](docs/assets/ls-labelling.png)
-
-**Model lineage in self-hosted W&B.** Each review batch triggers a `retrain` run;
-the charts compare runs side by side — `macro_f1`/`accuracy` (model quality),
-`promoted` (did it clear the gate), and `n_samples`/`n_eval`/`n_classes` (the
-training/eval split) — so you can see exactly how each batch of human labels moved
-the detector.
-
-![W&B retrain charts](docs/assets/wandb-charts.png)
-
-### Docker Compose on a GPU server
-
-For a dedicated mining server, build the worker image and start the local services:
+Install dependencies and run the offline demo:
 
 ```bash
+just setup
+just demo
+```
+
+Run checks:
+
+```bash
+just check
+```
+
+The demo writes generated data under `data/raw/` and `data/processed/`, logs W&B
+offline runs under `wandb/`, and creates a local model registry under
+`data/processed/model_registry/`.
+
+## Main Commands
+
+```bash
+just setup          # uv sync
+just check          # ruff + pytest
+just demo           # synthetic pipeline, scripts 00 -> 06
+just train          # retrain/promote the local FpDetector
+just clean          # remove generated data and local W&B outputs
+
+just setup-real     # install YOLO + CLIP extras
+just detect-prepare # prepare D-Fire dataset YAML
+just detect-train   # train YOLO detector
+just mine-fp        # mine real false-positive crops
+just build-hardneg  # build reviewed hard-negative YOLO dataset
+just retrain-hardneg
+just eval-gate      # detection-aware candidate gate
+
 just docker-build
-just docker-up
-```
-
-Run the full sample pipeline inside the container:
-
-```bash
+just docker-up      # minio + labelstudio + wandb + fileserver
+just docker-up-all  # also ml-backend + webhook
 just docker-demo
 ```
 
-Or open a shell in the GPU-enabled mining container:
+## Local Review Stack
 
-```bash
-just docker-shell
-```
+Docker Compose provides the services needed for a local Label Studio + W&B loop:
 
-The Compose stack includes:
+| Service | Role |
+| --- | --- |
+| `labelstudio` | human review UI |
+| `fileserver` | serves generated task images to the browser |
+| `ml-backend` | serves current detector predictions to Label Studio |
+| `webhook` | batches annotation events and triggers retraining |
+| `wandb` | self-hosted W&B Server for runs, Tables, and Artifacts |
+| `minio` | local S3-compatible object store |
 
-- `miner`: the reusable Python worker image for embedding, clustering, export, import, and W&B logging
-- `ml-backend`: Label Studio ML backend serving the detector (Phase 2)
-- `webhook`: retrain-trigger receiver (Phase 3)
-- `minio`: local S3-compatible object storage for frame/crop artifacts
-- `labelstudio`: human review UI
-- `wandb`: self-hosted Weights & Biases Server for runs, Tables, and Artifacts
+Use `.env` from `.env.example` to adjust ports and W&B credentials. The detailed
+walkthrough, including Label Studio model/webhook URLs and common fixes, is in
+[`docs/current/demo_walkthrough.md`](docs/current/demo_walkthrough.md).
 
-Bring up the local UIs and services with `just docker-up` (minio + labelstudio + wandb)
-or `just docker-up-all` (also ml-backend + webhook).
+## Real-Data Track
 
-**Host ports.** Defaults follow each service's native port, but on a host where
-those are taken you can remap them via a `.env` file (see `.env.example`):
-`LABEL_STUDIO_PORT`, `MINIO_API_PORT`, `MINIO_CONSOLE_PORT`, `WANDB_PORT`,
-`ML_BACKEND_PORT`, `WEBHOOK_PORT`.
-
-**Self-hosted W&B.** The `wandb` service runs the single-container `wandb/local`
-image with a persistent `wandb-server-data` volume. First run: open the W&B UI,
-create a user, copy the API key into `.env` as `WANDB_API_KEY`, then set
-`WANDB_MODE=online` so `scripts/05_log_to_wandb.py` logs to your instance (clients
-reach it at `http://wandb:8080` inside the network). Full W&B Server features
-require a license (`WANDB_LICENSE`) from https://deploy.wandb.ai; otherwise W&B
-stays in offline mode writing to `./wandb/`.
-
-On an NVIDIA GPU host, install the NVIDIA Container Toolkit and Docker Compose v2. The `miner` service requests all available GPUs through the Compose device reservation block.
-
-### 1. Install dependencies with uv
-
-```bash
-uv sync
-```
-
-This creates `.venv/` and installs the locked runtime dependencies from `pyproject.toml` and `uv.lock`.
-
-### Primary real-data loop
-
-The production-shaped path is the D-Fire/YOLO loop: mine real detector errors,
-cluster/rank FP crops, review them in Label Studio, build hard negatives, retrain
-YOLO, then compare and promote through the W&B-logged gate.
+The production-shaped path starts with a real detector instead of synthetic
+samples:
 
 ```bash
 just setup-real
@@ -282,227 +106,63 @@ just mine-fp
 uv run python scripts/01_extract_embeddings.py --method clip
 uv run python scripts/02_cluster_false_positives.py
 uv run python scripts/03_export_for_label_studio.py --budget 200 --strategy entropy
-# import the reviewed Label Studio export, then:
+```
+
+After review, import the Label Studio export and close the loop:
+
+```bash
+uv run python scripts/04_import_label_studio_export.py --input <label-studio-export.json>
 just build-hardneg
 just retrain-hardneg
-uv run python scripts/13_evaluate_and_gate.py --candidate /data/cpfp-output/yolo_runs/dfire-hardneg/weights/best.pt
+uv run python scripts/13_evaluate_and_gate.py --candidate /path/to/best.pt
 ```
 
-W&B runs are emitted for `mine-fp`, `build-hardneg`, `yolo-retrain`, and
-`eval-gate`. They default to offline mode and sync when `WANDB_MODE=online` is
-configured. See [`docs/current/real_data.md`](docs/current/real_data.md).
+See [`docs/current/real_data.md`](docs/current/real_data.md) for dataset paths,
+GPU notes, W&B smoke tests, and promotion-gate details.
 
-### Synthetic smoke-test loop
+## Architecture
 
-The synthetic path below is kept as a fast CI/demo loop. It validates the file
-contracts, Label Studio import/export shape, and local sklearn `FpDetector`
-serving loop without requiring real footage, GPU, or external accounts.
+For the implemented local system, start with
+[`docs/current/architecture.md`](docs/current/architecture.md) and
+[`docs/current/active_learning.md`](docs/current/active_learning.md).
 
-### 2. Generate synthetic false-positive samples
+The future production target keeps the same loop but moves execution and lineage
+to Argo Workflows, object storage, DuckLake, PostgreSQL-backed metadata, and
+W&B/MLflow registry controls.
 
-```bash
-uv run python scripts/00_generate_sample_data.py
-```
+![Future production architecture](docs/assets/architecture-overview.svg)
 
-This creates small synthetic images representing patterns such as `steam`, `reflection`, `headlight`, `shadow`, and `animal`.
+Full production design: [`docs/future/production_plan.md`](docs/future/production_plan.md).
 
-### 3. Extract embeddings
-
-Default mode uses lightweight image features so the demo runs anywhere:
-
-```bash
-uv run python scripts/01_extract_embeddings.py --method simple
-```
-
-Optional CLIP mode is provided, but requires extra dependencies and model download:
-
-```bash
-uv sync --extra clip
-uv run python scripts/01_extract_embeddings.py --method clip
-```
-
-### 4. Cluster false positives
-
-```bash
-uv run python scripts/02_cluster_false_positives.py
-```
-
-Outputs:
+## Repository Map
 
 ```text
-data/processed/fp_clusters.csv
-data/processed/fp_umap.csv
+configs/                 pipeline configuration
+data/                    generated samples, processed outputs, LS exports
+docs/current/            implemented behavior and local runbooks
+docs/future/             production roadmap and architecture
+docs/reference/          stable taxonomy/reference docs
+scripts/00-06_*.py       synthetic/offline mining pipeline
+scripts/10-15_*.py       real-data YOLO mining and hard-negative loop
+services/                Label Studio ML backend and retrain webhook
+src/cv_fp_lab/           reusable library code
+tests/                   unit tests for pipeline and service logic
 ```
 
-### 5. Export tasks for Label Studio
+## Documentation
 
-```bash
-uv run python scripts/03_export_for_label_studio.py
-```
+- Docs index: [`docs/README.md`](docs/README.md)
+- Local demo: [`docs/current/demo_walkthrough.md`](docs/current/demo_walkthrough.md)
+- Real-data loop: [`docs/current/real_data.md`](docs/current/real_data.md)
+- Label Studio setup: [`docs/current/label_studio_setup.md`](docs/current/label_studio_setup.md)
+- FP taxonomy: [`docs/reference/fp_taxonomy.md`](docs/reference/fp_taxonomy.md)
+- Production plan: [`docs/future/production_plan.md`](docs/future/production_plan.md)
 
-Every task is scored with an uncertainty/acquisition value (active-learning
-selection). By default all tasks are exported; pass a review budget to send only
-the most informative ones, ranked by uncertainty with round-robin cluster
-diversity so a single cluster cannot dominate:
+## Development Notes
 
-```bash
-uv run python scripts/03_export_for_label_studio.py --budget 30 --strategy entropy
-# strategies: least_confidence | margin | entropy; add --no-diversity for a plain sort
-```
-
-Outputs:
-
-```text
-data/processed/labelstudio_tasks.json     # tasks (carry uncertainty + acquisition_rank)
-data/processed/labelstudio_ranking.csv    # event_id, cluster_id, confidence, uncertainty, rank
-```
-
-This is the "selection" half of the [active learning loop](#active-learning-loop-extension);
-the ML backend and webhook-triggered retraining are implemented too — see
-[Live model serving and retraining loop](#live-model-serving-and-retraining-loop-phases-23).
-
-### 6. Import reviewed Label Studio export
-
-A small sample export is included:
-
-```bash
-uv run python scripts/04_import_label_studio_export.py \
-  --input data/labelstudio_exports/sample_review_export.json
-```
-
-Output:
-
-```text
-data/processed/reviewed_fp_samples.csv
-```
-
-### 7. Log dataset and tables to W&B
-
-Offline mode is enabled by default, so this works without a W&B account:
-
-```bash
-WANDB_MODE=offline uv run python scripts/05_log_to_wandb.py
-```
-
-To use your own W&B project:
-
-```bash
-wandb login
-WANDB_MODE=online WANDB_PROJECT=cv-fp-mining-lab uv run python scripts/05_log_to_wandb.py
-```
-
-### 8. Train the detector and promote it
-
-Train the `fp_type` classifier from current labels (bootstrapped from operator
-labels, refined by any review export), evaluate on a hold-out, and gate-promote
-it in the local model registry:
-
-```bash
-uv run python scripts/06_train_detector.py
-```
-
-Outputs a versioned model under `data/processed/model_registry/` with
-`candidate → staging → production` aliases. This is the trainable, servable model
-behind Phases 2–3.
-
-## Live model serving and retraining loop (Phases 2–3)
-
-The closed [active-learning loop](#active-learning-loop-extension) is implemented
-as two small Flask services (optional `serve` extra), backed by the detector and
-local registry:
-
-```bash
-uv sync --extra serve
-```
-
-**Phase 2 — Label Studio ML backend** serves the production detector so the review
-UI shows live `fp_type` pre-labels, a confidence score, and an `uncertainty` meta
-field for sorting:
-
-```bash
-uv run python services/ml_backend.py     # http://localhost:9090
-# POST {"tasks": [...]} to /predict ; GET /health
-```
-
-Point a Label Studio project's ML backend at this URL.
-
-**Phase 3 — retrain webhook** receives `ANNOTATION_CREATED` events, debounces them
-into batches, then retrains → evaluates → gate-promotes a new model version. The
-ML backend serves whatever is promoted to `production` next:
-
-```bash
-uv run python services/webhook.py        # http://localhost:9091
-# Label Studio webhook -> POST /webhook
-```
-
-Under Docker Compose both run as services (`ml-backend`, `webhook`). See
-[`docs/current/active_learning.md`](docs/current/active_learning.md) for the design.
-
-## Label Studio integration concept
-
-This lab does not require a running Label Studio server, but the generated `labelstudio_tasks.json` follows a simple image classification/review task style. In a real deployment:
-
-```text
-S3/MinIO frame path
-→ Label Studio task
-→ human review: is_event, fp_type, bbox_valid
-→ export JSON
-→ dataset builder
-→ W&B Artifact
-```
-
-See [`docs/current/label_studio_setup.md`](docs/current/label_studio_setup.md).
-
-## W&B usage concept
-
-W&B is used as the lineage and analysis layer:
-
-- **Artifacts**: mined FP crops, reviewed exports, hard-negative datasets, YOLO `.pt` candidates
-- **Tables**: images, metadata, cluster IDs, human labels, model version
-- **Runs**: `mine-fp`, `build-hardneg`, `yolo-retrain`, `eval-gate`, plus synthetic retrain demos
-- **Registry**: local `LocalModelRegistry` now; W&B Registry or equivalent aliases in production
-
-## Future works
-
-The current real-data loop is functional: mine real FP crops, review them in Label
-Studio, build hard negatives, retrain YOLO, log lineage to W&B, and protect
-production with a promotion gate. The remaining work is quality hardening and
-production migration.
-
-- **Clean hard-negative curation.** Build filtered hard-negative datasets from
-  reviewer-confirmed `false_positive` rows only, excluding `uncertain`, true
-  events, low-quality crops, and broad `unknown` labels unless explicitly needed.
-- **Hard-negative sampling controls.** Add knobs for FP type allowlists, per-type
-  caps, empty-label ratio, and oversampling so retraining can reduce FP rate
-  without sacrificing fire/smoke recall.
-- **Full-frame review context.** Show the source frame with the predicted bbox
-  overlay alongside the crop, then rename or refine `bbox_valid` into a clearer
-  detection-issue field.
-- **W&B training curves.** Parse Ultralytics `results.csv` and upload epoch-level
-  loss/mAP curves plus `results.png`, so retrain runs are comparable without
-  opening local run folders.
-- **Real online loop.** Connect the Label Studio ML backend and webhook path to
-  the real YOLO detector, not only the synthetic sklearn smoke-test detector.
-- **LLM-assisted review.** Add multimodal LLM pre-annotations as Label Studio
-  predictions, use detector/LLM disagreement for review prioritization, and keep
-  human validation before any auto-accept path.
-- **DuckLake lineage layer.** Sync mined events, embeddings, clusters, LLM labels,
-  human reviews, dataset versions, and gate results into queryable DuckLake
-  tables so dataset snapshots and model promotions can be audited with SQL.
-- **Production data integration.** Replace D-Fire paths with CCTV/object-storage
-  paths and attach production metadata from PostgreSQL, Kafka, or the event store.
-- **Orchestration.** Promote the script chain to Argo Workflows, Airflow, or
-  Kubernetes Jobs using the same file contracts and W&B artifacts.
-- **Registry migration.** Keep `LocalModelRegistry` for local demos, but map
-  candidate/staging/production aliases to W&B Registry or an internal model
-  registry before production use.
-- **Error-analysis tooling.** Add FiftyOne or an equivalent visual QA layer for
-  inspecting false positives, false negatives, bbox errors, and per-camera drift.
-
-## References to study
-
-- Mindtech Global: false positive clustering for object detection data improvement
-- ECCV 2018: unsupervised hard example mining from videos
-- Label Studio YOLO ML backend
-- W&B Artifacts / Tables / Ultralytics integration
-- FiftyOne object detection evaluation
+- Dependencies are managed with `uv`; optional extras are `clip`, `serve`, and
+  `detect`.
+- Keep scripts thin and put reusable behavior in `src/cv_fp_lab/`.
+- Preserve offline fallbacks: simple embeddings, UMAP/SVD fallback,
+  HDBSCAN/KMeans fallback, and empty/single-input handling are intentional.
+- Add new tunables to `configs/pipeline.yaml` instead of hardcoding them.

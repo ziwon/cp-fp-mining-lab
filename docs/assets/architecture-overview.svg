@@ -1,58 +1,164 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="860" viewBox="0 0 1400 860">
-  <rect width="1400" height="860" fill="#f7f9fc"/>
-  <rect x="90" y="70" width="1220" height="720" rx="24" fill="#ffffff" stroke="#d6deeb" stroke-width="2"/>
-  <text x="120" y="120" font-family="Arial, sans-serif" font-size="28" font-weight="700" fill="#14213d">CV False Positive Mining Platform</text>
-  <text x="120" y="152" font-family="Arial, sans-serif" font-size="16" fill="#4b5563">Production-grade feedback loop for model failures, review, lineage, and retraining</text>
-
-  <rect x="130" y="200" width="220" height="140" rx="16" fill="#e8f1ff" stroke="#5b8def" stroke-width="2"/>
-  <text x="155" y="240" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#163b8c">Production CV</text>
-  <text x="155" y="268" font-family="Arial, sans-serif" font-size="14" fill="#4b5563">Inference service</text>
-  <text x="155" y="292" font-family="Arial, sans-serif" font-size="14" fill="#4b5563">Events, bboxes, model versions</text>
-
-  <rect x="410" y="200" width="220" height="140" rx="16" fill="#eefbf4" stroke="#2f9e44" stroke-width="2"/>
-  <text x="440" y="240" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#1f5e2b">Argo Workflows</text>
-  <text x="440" y="268" font-family="Arial, sans-serif" font-size="14" fill="#4b5563">Mining, embedding, clustering</text>
-  <text x="440" y="292" font-family="Arial, sans-serif" font-size="14" fill="#4b5563">Dataset build, eval, promotion</text>
-
-  <rect x="690" y="200" width="220" height="140" rx="16" fill="#fff4e6" stroke="#d97706" stroke-width="2"/>
-  <text x="725" y="240" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#9a4b00">Label Studio</text>
-  <text x="725" y="268" font-family="Arial, sans-serif" font-size="14" fill="#4b5563">Human review UI</text>
-  <text x="725" y="292" font-family="Arial, sans-serif" font-size="14" fill="#4b5563">Pre-labels + review decisions</text>
-
-  <rect x="970" y="200" width="220" height="140" rx="16" fill="#f4ebff" stroke="#7c3aed" stroke-width="2"/>
-  <text x="1005" y="240" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#5b21b6">DuckLake + Postgres</text>
-  <text x="1005" y="268" font-family="Arial, sans-serif" font-size="14" fill="#4b5563">Lineage, metadata, snapshots</text>
-  <text x="1005" y="292" font-family="Arial, sans-serif" font-size="14" fill="#4b5563">Events, reviews, datasets</text>
-
-  <line x1="350" y1="270" x2="410" y2="270" stroke="#64748b" stroke-width="3" marker-end="url(#arrow)"/>
-  <line x1="630" y1="270" x2="690" y2="270" stroke="#64748b" stroke-width="3" marker-end="url(#arrow)"/>
-  <line x1="910" y1="270" x2="970" y2="270" stroke="#64748b" stroke-width="3" marker-end="url(#arrow)"/>
-
-  <rect x="240" y="420" width="240" height="220" rx="16" fill="#f8fafc" stroke="#94a3b8" stroke-width="2"/>
-  <text x="270" y="460" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#334155">Object Storage</text>
-  <text x="270" y="490" font-family="Arial, sans-serif" font-size="14" fill="#4b5563">Raw frames, crops, embeddings</text>
-  <text x="270" y="516" font-family="Arial, sans-serif" font-size="14" fill="#4b5563">Parquet, manifests, models</text>
-  <text x="270" y="542" font-family="Arial, sans-serif" font-size="14" fill="#4b5563">MinIO / S3-compatible</text>
-
-  <rect x="540" y="420" width="240" height="220" rx="16" fill="#f8fafc" stroke="#94a3b8" stroke-width="2"/>
-  <text x="570" y="460" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#334155">ML Lifecycle</text>
-  <text x="570" y="490" font-family="Arial, sans-serif" font-size="14" fill="#4b5563">W&amp;B / MLflow</text>
-  <text x="570" y="516" font-family="Arial, sans-serif" font-size="14" fill="#4b5563">Runs, artifacts, metrics</text>
-  <text x="570" y="542" font-family="Arial, sans-serif" font-size="14" fill="#4b5563">Candidate/staging/production</text>
-
-  <rect x="840" y="420" width="240" height="220" rx="16" fill="#f8fafc" stroke="#94a3b8" stroke-width="2"/>
-  <text x="870" y="460" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#334155">Operations</text>
-  <text x="870" y="490" font-family="Arial, sans-serif" font-size="14" fill="#4b5563">Prometheus, Grafana, Loki</text>
-  <text x="870" y="516" font-family="Arial, sans-serif" font-size="14" fill="#4b5563">Alerts, retention, backup</text>
-  <text x="870" y="542" font-family="Arial, sans-serif" font-size="14" fill="#4b5563">RBAC, secrets, audit</text>
-
-  <line x1="520" y1="340" x2="520" y2="420" stroke="#64748b" stroke-width="2" stroke-dasharray="6 6"/>
-  <line x1="800" y1="340" x2="800" y2="420" stroke="#64748b" stroke-width="2" stroke-dasharray="6 6"/>
-  <line x1="1080" y1="340" x2="1080" y2="420" stroke="#64748b" stroke-width="2" stroke-dasharray="6 6"/>
-
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="825" viewBox="0 0 1600 825" role="img" aria-label="CV FP Mining Production System Architecture">
   <defs>
-    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
-      <path d="M0,0 L0,6 L8,3 z" fill="#64748b"/>
-    </marker>
+    <style>
+      .bg { fill: #17172a; }
+      .layer-title { font: 800 19px Inter, Arial, sans-serif; fill: #ffffff; }
+      .layer-sub { font: 500 12px Inter, Arial, sans-serif; fill: #d5daf0; opacity: 0.9; }
+      .card-title { font: 800 15px Inter, Arial, sans-serif; fill: #ffffff; }
+      .card-text { font: 500 11.5px Inter, Arial, sans-serif; fill: #e8ebf8; opacity: 0.94; }
+      .card { stroke: rgba(255,255,255,0.58); stroke-width: 1.1; }
+    </style>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#151528"/>
+      <stop offset="0.5" stop-color="#1b1b32"/>
+      <stop offset="1" stop-color="#121522"/>
+    </linearGradient>
+    <linearGradient id="coreGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#4b3a8a"/>
+      <stop offset="1" stop-color="#2a2462"/>
+    </linearGradient>
+    <linearGradient id="greenGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#246a57"/>
+      <stop offset="1" stop-color="#173f36"/>
+    </linearGradient>
+    <linearGradient id="blueGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#22618a"/>
+      <stop offset="1" stop-color="#153d5d"/>
+    </linearGradient>
+    <linearGradient id="orangeGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#8a5722"/>
+      <stop offset="1" stop-color="#5a3519"/>
+    </linearGradient>
+    <linearGradient id="pinkGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#7a2a6d"/>
+      <stop offset="1" stop-color="#4a1c49"/>
+    </linearGradient>
+    <linearGradient id="grayGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#344052"/>
+      <stop offset="1" stop-color="#252c3a"/>
+    </linearGradient>
   </defs>
+
+  <rect class="bg" width="1600" height="825" fill="url(#bgGrad)"/>
+  <circle cx="1430" cy="75" r="230" fill="#4b3a8a" opacity="0.13"/>
+  <circle cx="120" cy="835" r="260" fill="#22618a" opacity="0.12"/>
+
+  <g transform="translate(0,-85)">
+  <g>
+    <rect x="70" y="130" width="330" height="252" rx="24" fill="#241a38" stroke="#b89be5" stroke-width="1.5"/>
+    <text x="95" y="164" class="layer-title">External Production</text>
+    <text x="96" y="185" class="layer-sub">Site and operations systems</text>
+    <rect x="95" y="210" width="280" height="48" rx="13" fill="url(#pinkGrad)" class="card"/>
+    <text x="115" y="238" class="card-title">CCTV / VMS / Edge</text>
+    <rect x="95" y="270" width="280" height="48" rx="13" fill="url(#pinkGrad)" class="card"/>
+    <text x="115" y="298" class="card-title">Production CV Inference</text>
+    <rect x="95" y="330" width="132" height="34" rx="12" fill="#32274a" stroke="#8a7dbb"/>
+    <text x="113" y="352" class="card-text">Event DB / Kafka</text>
+    <rect x="243" y="330" width="132" height="34" rx="12" fill="#32274a" stroke="#8a7dbb"/>
+    <text x="262" y="352" class="card-text">Model Runtime</text>
+  </g>
+
+  <g>
+    <rect x="430" y="130" width="330" height="252" rx="24" fill="#162a3d" stroke="#78b7e6" stroke-width="1.5"/>
+    <text x="455" y="164" class="layer-title">Access &amp; API</text>
+    <text x="456" y="185" class="layer-sub">cv-mining-system</text>
+    <rect x="455" y="210" width="280" height="44" rx="13" fill="url(#blueGrad)" class="card"/>
+    <text x="475" y="237" class="card-title">Ingress / API Gateway</text>
+    <rect x="455" y="265" width="136" height="44" rx="13" fill="url(#blueGrad)" class="card"/>
+    <text x="474" y="292" class="card-title">Event Ingest</text>
+    <rect x="599" y="265" width="136" height="44" rx="13" fill="url(#blueGrad)" class="card"/>
+    <text x="616" y="292" class="card-title">Webhook API</text>
+    <rect x="455" y="320" width="136" height="44" rx="13" fill="#173b5c" stroke="#78b7e6"/>
+    <text x="479" y="347" class="card-title">Admin API</text>
+    <rect x="599" y="320" width="136" height="44" rx="13" fill="#173b5c" stroke="#78b7e6"/>
+    <text x="619" y="347" class="card-title">Taxonomy API</text>
+  </g>
+
+  <g>
+    <rect x="790" y="130" width="740" height="252" rx="24" fill="#211b42" stroke="#aa9df0" stroke-width="1.5"/>
+    <text x="820" y="164" class="layer-title">Workflow Orchestration</text>
+    <text x="821" y="185" class="layer-sub">Argo Workflows as the operating unit</text>
+    <rect x="820" y="210" width="200" height="118" rx="18" fill="url(#coreGrad)" class="card"/>
+    <text x="845" y="244" class="card-title">Argo Server</text>
+    <text x="845" y="269" class="card-text">UI / API / RBAC</text>
+    <text x="845" y="291" class="card-text">workflow visibility</text>
+    <rect x="1040" y="210" width="200" height="118" rx="18" fill="url(#coreGrad)" class="card"/>
+    <text x="1065" y="244" class="card-title">Workflow Controller</text>
+    <text x="1065" y="269" class="card-text">DAG execution</text>
+    <text x="1065" y="291" class="card-text">retry / artifact passing</text>
+    <rect x="1260" y="210" width="240" height="52" rx="16" fill="#332b69" stroke="#aa9df0"/>
+    <text x="1285" y="242" class="card-title">WorkflowTemplates</text>
+    <rect x="1260" y="276" width="112" height="52" rx="16" fill="#332b69" stroke="#aa9df0"/>
+    <text x="1281" y="308" class="card-title">CronWF</text>
+    <rect x="1388" y="276" width="112" height="52" rx="16" fill="#332b69" stroke="#aa9df0"/>
+    <text x="1406" y="308" class="card-title">EventWF</text>
+  </g>
+
+  <g>
+    <rect x="70" y="415" width="1460" height="238" rx="26" fill="#14251f" stroke="#81c9b0" stroke-width="1.5"/>
+    <text x="100" y="450" class="layer-title">Workflow Families</text>
+    <text x="101" y="471" class="layer-sub">All batch jobs run as Argo Workflow, CronWorkflow, or WorkflowTemplate</text>
+
+    <rect x="100" y="500" width="420" height="112" rx="20" fill="url(#greenGrad)" class="card"/>
+    <text x="126" y="532" class="card-title">Mining &amp; Active Learning</text>
+    <text x="126" y="557" class="card-text">Candidate Mining - Crop Resolve - Embedding</text>
+    <text x="126" y="579" class="card-text">Clustering - Acquisition Ranking - Cleanlab Audit</text>
+
+    <rect x="550" y="500" width="420" height="112" rx="20" fill="url(#orangeGrad)" class="card"/>
+    <text x="576" y="532" class="card-title">Dataset / Training / Evaluation</text>
+    <text x="576" y="557" class="card-text">Dataset Builder - Dataset Validation</text>
+    <text x="576" y="579" class="card-text">Training - Evaluation Gate - Model Promotion</text>
+
+    <rect x="1000" y="500" width="500" height="112" rx="20" fill="url(#grayGrad)" class="card"/>
+    <text x="1026" y="532" class="card-title">Maintenance &amp; Data Quality</text>
+    <text x="1026" y="557" class="card-text">DuckLake Compaction - Snapshot Retention - PostgreSQL Backup / PITR</text>
+    <text x="1026" y="579" class="card-text">Object Cleanup - Freshness Check - Dataset Leakage Check</text>
+  </g>
+
+  <g>
+    <rect x="70" y="685" width="460" height="210" rx="24" fill="#2b1933" stroke="#d38fd0" stroke-width="1.5"/>
+    <text x="100" y="720" class="layer-title">Review &amp; Annotation</text>
+    <text x="101" y="741" class="layer-sub">cv-review</text>
+    <rect x="100" y="766" width="190" height="48" rx="14" fill="url(#pinkGrad)" class="card"/>
+    <text x="122" y="795" class="card-title">Label Studio</text>
+    <rect x="310" y="766" width="190" height="48" rx="14" fill="url(#pinkGrad)" class="card"/>
+    <text x="332" y="795" class="card-title">ML Backend</text>
+    <rect x="100" y="830" width="190" height="38" rx="13" fill="#46244f" stroke="#d38fd0"/>
+    <text x="125" y="854" class="card-title">Review Sync Worker</text>
+    <rect x="310" y="830" width="190" height="38" rx="13" fill="#46244f" stroke="#d38fd0"/>
+    <text x="339" y="854" class="card-title">Human / LLM Oracle</text>
+  </g>
+
+  <g>
+    <rect x="560" y="685" width="455" height="210" rx="24" fill="#102d3b" stroke="#84d7ee" stroke-width="1.5"/>
+    <text x="590" y="720" class="layer-title">Lakehouse &amp; Metadata</text>
+    <text x="591" y="741" class="layer-sub">cv-data - DuckLake + PostgreSQL</text>
+    <rect x="590" y="766" width="180" height="48" rx="14" fill="url(#blueGrad)" class="card"/>
+    <text x="613" y="795" class="card-title">DuckDB Runtime</text>
+    <rect x="790" y="766" width="195" height="48" rx="14" fill="url(#blueGrad)" class="card"/>
+    <text x="816" y="795" class="card-title">DuckLake Tables</text>
+    <rect x="590" y="830" width="180" height="38" rx="13" fill="#163b4b" stroke="#84d7ee"/>
+    <text x="622" y="854" class="card-title">PostgreSQL HA</text>
+    <rect x="790" y="830" width="195" height="38" rx="13" fill="#163b4b" stroke="#84d7ee"/>
+    <text x="810" y="854" class="card-title">Catalog / App Metadata</text>
+  </g>
+
+  <g>
+    <rect x="1045" y="685" width="485" height="210" rx="24" fill="#332614" stroke="#e8b264" stroke-width="1.5"/>
+    <text x="1075" y="720" class="layer-title">Object Storage &amp; ML Lifecycle</text>
+    <text x="1076" y="741" class="layer-sub">MinIO / S3 - W&amp;B or MLflow</text>
+    <rect x="1075" y="766" width="200" height="48" rx="14" fill="url(#orangeGrad)" class="card"/>
+    <text x="1100" y="795" class="card-title">MinIO / S3 Buckets</text>
+    <rect x="1295" y="766" width="205" height="48" rx="14" fill="url(#orangeGrad)" class="card"/>
+    <text x="1321" y="795" class="card-title">W&amp;B / MLflow</text>
+    <rect x="1075" y="830" width="95" height="38" rx="13" fill="#4d361d" stroke="#e8b264"/>
+    <text x="1105" y="854" class="card-title">raw</text>
+    <rect x="1180" y="830" width="95" height="38" rx="13" fill="#4d361d" stroke="#e8b264"/>
+    <text x="1206" y="854" class="card-title">crops</text>
+    <rect x="1295" y="830" width="95" height="38" rx="13" fill="#4d361d" stroke="#e8b264"/>
+    <text x="1312" y="854" class="card-title">datasets</text>
+    <rect x="1400" y="830" width="100" height="38" rx="13" fill="#4d361d" stroke="#e8b264"/>
+    <text x="1420" y="854" class="card-title">registry</text>
+  </g>
+  </g>
 </svg>
