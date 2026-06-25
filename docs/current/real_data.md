@@ -19,6 +19,10 @@ just setup-real                 # uv sync --extra detect --extra clip
 CPU works for small subsets. For GPU, set `yolo.device: 0` (and
 `embedding.device: cuda`) in `configs/pipeline.yaml`.
 
+The default Docker image is intentionally slim for the synthetic/services demo
+(`serve` extra only). For real-data YOLO/CLIP work, either use a host/venv
+created with `just setup-real`, or use the separate heavy `miner-real` image.
+
 ### GPU setup (NVIDIA Blackwell, RTX 50xx / sm_120)
 
 Blackwell needs a recent CUDA torch build (the default PyPI torch fails with a
@@ -61,6 +65,42 @@ uv run python scripts/03_export_for_label_studio.py
 `mine-fp` writes `data/processed/fp_events.csv` (same schema as the synthetic
 generator, plus `source_image_path` and `is_negative_image`) and the FP crops.
 
+## Docker real-data worker
+
+Build the heavy real-data image when you want YOLO/CLIP dependencies inside
+Docker instead of a host venv:
+
+```bash
+just docker-build-real
+just docker-real-shell
+```
+
+For CUDA-specific Torch wheels, set `TORCH_INDEX_URL` in `.env` before building.
+For example:
+
+```bash
+TORCH_INDEX_URL=https://download.pytorch.org/whl/cu128 just docker-build-real
+```
+
+The `miner-real` service mounts the repo data plus host `/data`, so the default
+D-Fire and `/data/cpfp-output` paths in `configs/pipeline.yaml` work inside the
+container. Typical commands:
+
+```bash
+docker compose run --rm miner-real python scripts/10_prepare_dfire.py
+docker compose run --rm miner-real python scripts/11_train_yolo_detector.py
+docker compose run --rm miner-real python scripts/12_mine_false_positives.py
+docker compose run --rm miner-real python scripts/01_extract_embeddings.py --method clip
+```
+
+Convenience recipes are available for the common worker entrypoints:
+
+```bash
+just docker-real-mine-fp
+just docker-real-embed
+just docker-real-retrain
+```
+
 For production-shaped active learning, treat the synthetic pipeline as a smoke test
 and run Label Studio/W&B on this real-data track:
 
@@ -93,7 +133,7 @@ handoff verification**, not model improvement; 30-50 reviewed crops are enough.
 
    ```bash
    just setup-real
-   just docker-build
+   just docker-build-real
    docker compose up -d minio labelstudio wandb fileserver
    ```
 
@@ -177,6 +217,7 @@ unlike the underfit smoke-test model that only fired at `conf≈0.01`.
   D-Fire FPs, CLIP took HDBSCAN from 2 collapsed clusters to 9, with fire FPs
   separating into their own clusters. (Euclidean silhouette undersells CLIP since
   it lives in cosine space — judge by cluster structure, not euclidean distance.)
+
 ## Detection-aware promotion gate (step 4)
 
 `scripts/13_evaluate_and_gate.py` (`just eval-gate`) replaces the single-scalar
@@ -221,8 +262,8 @@ The real detector loop is closed end-to-end:
 ```bash
 just mine-fp        # (12) confirmed FPs from a non-eval pool (train/external)
 just build-hardneg  # (14) FP source frames -> validated YOLO hard-negative dataset
-just retrain-hardneg# (15) fine-tune production on [base train + hard negatives]
-just eval-gate -- --candidate <new best.pt>   # (13) gate decides promotion
+just retrain-hardneg # (15) fine-tune production on [base train + hard negatives]
+uv run python scripts/13_evaluate_and_gate.py --candidate <new best.pt>
 ```
 
 `dataset_builder.build_hard_negative_dataset` copies each confirmed FP's source

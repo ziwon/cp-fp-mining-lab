@@ -1,0 +1,44 @@
+FROM python:3.11-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1 \
+    UV_PROJECT_ENVIRONMENT=/usr/local \
+    PYTHONPATH=/app/src
+
+WORKDIR /app
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        build-essential \
+        git \
+        libgl1 \
+        libglib2.0-0 \
+        libgomp1 \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY pyproject.toml uv.lock README.md ./
+
+# Real-data dependencies are intentionally isolated from the slim service image.
+# Override TORCH_INDEX_URL for a CUDA-specific wheel index when the default PyPI
+# torch build does not match the host GPU, e.g. Blackwell/RTX 50xx.
+ARG TORCH_INDEX_URL=""
+RUN python -m pip install --upgrade pip uv \
+    && if [ -n "$TORCH_INDEX_URL" ]; then \
+        uv sync --frozen --no-dev --no-install-project \
+          --extra serve --extra detect --extra clip \
+          --index-url "$TORCH_INDEX_URL" \
+          --extra-index-url https://pypi.org/simple \
+          --index-strategy unsafe-best-match; \
+      else \
+        uv sync --frozen --no-dev --no-install-project \
+          --extra serve --extra detect --extra clip; \
+      fi
+
+COPY configs ./configs
+COPY scripts ./scripts
+COPY services ./services
+COPY src ./src
+COPY data/labelstudio_exports ./data/labelstudio_exports
+
+CMD ["bash"]

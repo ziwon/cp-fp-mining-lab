@@ -71,9 +71,11 @@ just retrain-hardneg
 just eval-gate      # detection-aware candidate gate
 
 just docker-build
+just docker-build-real # heavy YOLO/CLIP image for real-data work
 just docker-up      # minio + labelstudio + wandb + fileserver
 just docker-up-all  # also ml-backend + webhook
 just docker-demo
+just docker-real-shell
 ```
 
 ## Local Review Stack
@@ -88,6 +90,7 @@ Docker Compose provides the services needed for a local Label Studio + W&B loop:
 | `webhook` | batches annotation events and triggers retraining |
 | `wandb` | self-hosted W&B Server for runs, Tables, and Artifacts |
 | `minio` | local S3-compatible object store |
+| `miner-real` | optional heavy YOLO/CLIP worker image for real-data GPU work |
 
 Use `.env` from `.env.example` to adjust ports and W&B credentials. The detailed
 walkthrough, including Label Studio model/webhook URLs and common fixes, is in

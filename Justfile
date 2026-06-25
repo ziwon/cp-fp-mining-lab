@@ -60,6 +60,9 @@ clean:
 docker-build:
     docker compose build miner
 
+docker-build-real:
+    docker compose build miner-real
+
 docker-demo:
     docker compose run --rm miner bash -lc '\
         python scripts/00_generate_sample_data.py && \
@@ -72,6 +75,18 @@ docker-demo:
 
 docker-shell:
     docker compose run --rm miner bash
+
+docker-real-shell:
+    docker compose run --rm miner-real bash
+
+docker-real-mine-fp:
+    docker compose run --rm miner-real python scripts/12_mine_false_positives.py
+
+docker-real-embed:
+    docker compose run --rm miner-real python scripts/01_extract_embeddings.py --method clip
+
+docker-real-retrain:
+    docker compose run --rm miner-real python scripts/15_retrain_with_hard_negatives.py
 
 docker-up:
     docker compose up -d minio labelstudio wandb fileserver

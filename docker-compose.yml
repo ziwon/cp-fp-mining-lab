@@ -34,6 +34,43 @@ services:
               count: all
               capabilities: [gpu]
 
+  miner-real:
+    build:
+      context: .
+      dockerfile: Dockerfile.real
+      args:
+        TORCH_INDEX_URL: ${TORCH_INDEX_URL:-}
+    image: cv-fp-mining-lab-real:latest
+    working_dir: /app
+    environment:
+      PYTHONPATH: /app/src
+      WANDB_MODE: ${WANDB_MODE:-offline}
+      WANDB_PROJECT: ${WANDB_PROJECT:-cv-fp-mining-lab}
+      WANDB_BASE_URL: ${WANDB_BASE_URL:-http://wandb:8080}
+      WANDB_API_KEY: ${WANDB_API_KEY:-}
+      NVIDIA_VISIBLE_DEVICES: ${NVIDIA_VISIBLE_DEVICES:-all}
+      NVIDIA_DRIVER_CAPABILITIES: compute,utility
+      S3_ENDPOINT_URL: http://minio:9000
+      S3_BUCKET: ${S3_BUCKET:-cv-fp-mining}
+      AWS_ACCESS_KEY_ID: ${MINIO_ROOT_USER:-minioadmin}
+      AWS_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD:-minioadmin}
+    volumes:
+      - ./configs:/app/configs:ro
+      - ./scripts:/app/scripts:ro
+      - ./src:/app/src:ro
+      - ./data:/app/data
+      - ./wandb:/app/wandb
+      - /data:/data
+    depends_on:
+      - minio
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
   ml-backend:
     image: cv-fp-mining-lab:latest
     working_dir: /app
