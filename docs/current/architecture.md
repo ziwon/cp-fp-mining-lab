@@ -53,7 +53,7 @@ GPU Server
       Python worker image
       embedding extraction, clustering, dataset export/import, W&B logging
       /app/data mounted from host storage
-      optional NVIDIA GPU access for CLIP/DINOv2 embeddings
+      optional NVIDIA GPU access when built with CLIP/detect extras
 
     MinIO
       S3-compatible frame/crop/object store
@@ -108,7 +108,8 @@ Production workflow boundaries:
 
 Recommended production progression:
 
-1. **Single GPU server**: Docker Compose, host-mounted data, MinIO, Label Studio, offline/online W&B.
+1. **Single GPU server**: host venv or a real-data image with `clip`/`detect`,
+   host-mounted data, MinIO, Label Studio, offline/online W&B.
 2. **Shared storage**: replace host paths with object storage and keep Compose for the worker.
 3. **Scheduled jobs**: run the same image as a Kubernetes `CronJob` or workflow step.
 4. **Elastic mining**: shard embedding extraction across GPU jobs and merge embeddings before clustering.

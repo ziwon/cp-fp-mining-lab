@@ -10,9 +10,8 @@ specifics see [`label_studio_setup.md`](label_studio_setup.md).
 
 ## Services and ports
 
-The stack remaps host ports because the defaults (8080/9000) are often taken; the
-values below come from `.env` (copy from `.env.example`). Container-internal ports
-are unchanged.
+The values below are the defaults from `.env.example`. If a port is taken, edit
+`.env`; container-internal ports are unchanged.
 
 | Service | Browser URL (host) | In-network address | Role |
 | --- | --- | --- | --- |
@@ -115,7 +114,8 @@ verify with `curl localhost:9090/health`.
 
 ## 5. W&B lineage
 
-http://localhost:18082/aaron/cv-fp-mining-lab — filter runs by `job_type`:
+Open the W&B URL configured by `WANDB_HOST` (default `http://localhost:18082`) and
+filter runs by `job_type`:
 
 - `retrain` — one run per review batch: `macro_f1`/`accuracy`/`promoted`, the
   model artifact (alias `production` or `candidate`), and the `review_batch` Table.

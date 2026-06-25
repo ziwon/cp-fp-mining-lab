@@ -2,23 +2,22 @@
 
 ## Where the current lab stands
 
-The lab today is **model-assisted curation**, not active learning:
+The lab now has a small closed-loop active-learning demo and a production-shaped
+real-data loop:
 
-- Tasks carry the detector's prediction as a Label Studio `predictions` block
-  (`pred_class`, `pred_confidence`, `model_version`) — see
-  `src/cv_fp_lab/labelstudio.py`.
-- Sample **selection** is done by UMAP + HDBSCAN/K-Means clustering
-  (`src/cv_fp_lab/clustering.py`), which groups repeated FP patterns for bulk review.
-- The loop is one-directional: export tasks → human review → `parse_labelstudio_export`
-  → reviewed CSV → W&B artifact. Nothing feeds labels back into a live model.
+- **Synthetic smoke-test loop**: scripts 00-06 create FP samples, rank Label
+  Studio tasks by uncertainty + cluster diversity, train the sklearn
+  `FpDetector`, serve it through `services/ml_backend.py`, and retrain from
+  Label Studio webhook batches through `services/webhook.py`.
+- **Primary real-data loop**: scripts 10-15 train/mine with YOLO, cluster/rank
+  real FP crops, build reviewed hard-negative datasets, retrain YOLO, and gate
+  candidates with detection metrics.
 
-Active learning closes that loop: a live model scores unlabeled candidates, an
-acquisition function picks the most informative ones, humans label them, and the new
-labels trigger retraining and redeployment. In production, the acquisition queue,
-review outcomes, dataset manifests, and gate results should also be synced to
-DuckLake so every active-learning round can be replayed from a snapshot. See
-[`../future/`](../future/) for the full platform
-contract.
+The remaining production gap is not "close the loop" in the repo; it is moving
+the loop's durable state into production systems. The acquisition queue, review
+outcomes, dataset manifests, and gate results should be synced to DuckLake so
+every round can be replayed from a snapshot. See [`../future/`](../future/) for
+the full platform contract.
 
 ## Target loop
 
@@ -92,15 +91,16 @@ validation, Kubernetes deployment).
 
 ### 1. Label Studio ML backend
 
-Run the detector behind the Label Studio ML backend SDK so the UI shows live
+Run the detector behind the Label Studio ML backend so the UI shows live
 predictions and can request scores on demand.
 
-- Implement `predict(tasks, **kwargs)` to return detections + a per-task
-  uncertainty score.
-- Pin the served model to a W&B Registry alias (e.g. `detector:production`); a
-  registry promotion swaps the backend by re-pulling that alias.
-- Deploy as its own Compose service / Kubernetes `Deployment` (GPU node pool) so it
-  scales independently of the batch miner.
+- Implemented locally by `services/ml_backend.py`, which serves the current
+  `LocalModelRegistry` `production` alias and returns Label Studio predictions
+  plus a per-task uncertainty score.
+- In production, pin the served model to a W&B/MLflow Registry alias; a registry
+  promotion swaps the backend by re-pulling that alias.
+- Deploy as its own Compose service / Kubernetes `Deployment` so it scales
+  independently of the batch miner.
 
 ```yaml
 # docker-compose.yml (sketch)
@@ -117,33 +117,34 @@ ml-backend:
 
 ### 2. Acquisition / ranking step
 
-Replace "cluster, then review everything" with "cluster for diversity, then rank within
-budget by informativeness". Add a script (e.g. `scripts/06_rank_active_learning.py`) and
-a `cv_fp_lab/active_learning.py` module:
+Replace "cluster, then review everything" with "cluster for diversity, then rank
+within budget by informativeness". This is implemented in
+`cv_fp_lab/active_learning.py` and exposed by `scripts/03_export_for_label_studio.py`:
 
 - **Uncertainty scores**: least-confidence `1 - max p`, margin `p1 - p2`, or entropy.
 - **Diversity**: keep one or a few representatives per HDBSCAN cluster to avoid
   labeling near-duplicates (clustering stays useful — it just feeds ranking).
 - **Hybrid score**: `score = α · uncertainty + β · cluster_rarity`, then take the top-N
   within a per-batch review budget.
-- Write the ranked subset as the Label Studio task export instead of the full set.
+- Write the ranked subset as the Label Studio task export when `--budget` is set.
 
 ### 3. Webhook-driven retraining
 
 Configure a Label Studio webhook (`ANNOTATION_CREATED` / `ANNOTATIONS_CREATED`, or a
-project "annotations submitted" event) to a small receiver that:
+project "annotations submitted" event) to `services/webhook.py`. The local demo
+receiver:
 
 1. Debounces until a batch threshold is reached (e.g. N new annotations or a timer).
-2. Runs the dataset builder (review export → YOLO/COCO hard-negative dataset).
-3. Validates label schema + bbox quality.
-4. Launches retraining, then **regression evaluation** against a frozen eval set.
-5. Publishes the result as a W&B Artifact and registers a candidate model.
-6. Promotes `candidate → staging → production` only if eval gates pass; promotion
+2. Persists corrected labels into `data/processed/webhook_reviews.csv`.
+3. Retrains the sklearn `FpDetector` from embeddings and label overrides.
+4. Evaluates with a hold-out metric and registers a candidate model.
+5. Logs a W&B retrain run when W&B is available.
+6. Promotes `candidate → staging → production` only if the metric gate passes; promotion
    updates the alias the ML backend serves.
 
-In Kubernetes this receiver is a webhook `Deployment` that submits an Argo Workflow /
-`Job`; in the Compose lab it can be a tiny FastAPI/Flask service that shells out to the
-existing scripts.
+In production this receiver should submit an Argo Workflow / Kubernetes `Job` to
+build datasets, validate schemas/bboxes, train, evaluate, and promote out of
+process.
 
 ## Stopping / iteration policy
 
